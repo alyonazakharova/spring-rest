@@ -1,13 +1,14 @@
 package main.service.impl;
 
-import main.entity.Good;
 import main.entity.Warehouse1;
+import main.exception.GoodNotFoundException;
 import main.repository.Warehouse1Repository;
 import main.service.Warehouse1Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class Warehouse1ServiceImpl implements Warehouse1Service {
@@ -21,22 +22,25 @@ public class Warehouse1ServiceImpl implements Warehouse1Service {
     }
 
     @Override
-    public Good findGood(Integer id) {
-        return null;
+    public Warehouse1 addGood(Warehouse1 w1Good) {
+        return warehouse1Repository.save(w1Good);
     }
 
     @Override
-    public Good addGood(Good good) {
-        return null;
+    public Warehouse1 updateGood(Integer id, Warehouse1 w1Good) {
+        Optional<Warehouse1> optionalW1Good = warehouse1Repository.findById(id);
+        if (optionalW1Good.isPresent()) {
+            Warehouse1 w1 = optionalW1Good.get();
+            w1.setGood(w1Good.getGood());
+            w1.setGoodCount(w1Good.getGoodCount());
+            return warehouse1Repository.saveAndFlush(w1);
+        } else {
+            throw new GoodNotFoundException("Good not found in warehouse1");
+        }
     }
 
     @Override
-    public void deleteFood(Integer id) {
-
-    }
-
-    @Override
-    public Good updateGood(Integer id) {
-        return null;
+    public void deleteGood(Integer id) {
+        //как должно все удаляться???
     }
 }

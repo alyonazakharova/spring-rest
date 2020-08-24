@@ -7,8 +7,7 @@ import java.util.List;
 
 public interface Warehouse2Service {
     List<Warehouse2> listGoods();
-    Good findGood(Integer id);
-    Good addGood(Good good);
+    Warehouse2 addGood(Warehouse2 w2Good);
+    Warehouse2 updateGood(Integer id, Warehouse2 w2Good);
     void deleteFood(Integer id);
-    Good updateGood(Integer id);
 }

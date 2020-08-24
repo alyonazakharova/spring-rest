@@ -37,6 +37,7 @@ public class SaleServiceImpl implements SaleService {
         return saleRepository.save(sale);
     }
 
+    //как должно все удаляться???
     @Override
     public void delete(Integer id) {
         try {

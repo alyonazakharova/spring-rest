@@ -110,7 +110,10 @@ Vue.component('goods-list', {
 var app = new Vue({
     el: '#app',
     template:
-        '<goods-list :goods="goods"/>',
+        '<div>' +
+            '<h3>All goods:</h3>' +
+            '<goods-list :goods="goods"/>' +
+        '</div>',
     data: {
         goods: []
     }
