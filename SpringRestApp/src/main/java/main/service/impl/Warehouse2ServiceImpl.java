@@ -22,6 +22,16 @@ public class Warehouse2ServiceImpl implements Warehouse2Service {
     }
 
     @Override
+    public Warehouse2 find(Integer id) {
+        Optional<Warehouse2> optionalW2 = warehouse2Repository.findById(id);
+        if (optionalW2.isPresent()) {
+            return optionalW2.get();
+        } else {
+            throw new GoodNotFoundException("Good not found in warehouse 2");
+        }
+    }
+
+    @Override
     public Warehouse2 addGood(Warehouse2 w2Good) {
         return warehouse2Repository.save(w2Good);
     }
@@ -40,7 +50,11 @@ public class Warehouse2ServiceImpl implements Warehouse2Service {
     }
 
     @Override
-    public void deleteFood(Integer id) {
-        //как должно все удаляться???
+    public void deleteGood(Integer id) {
+        try {
+            warehouse2Repository.deleteById(id);
+        } catch (Exception e) {
+            throw new GoodNotFoundException("Good not found in warehouse 2");
+        }
     }
 }

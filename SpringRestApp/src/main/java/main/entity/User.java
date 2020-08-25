@@ -1,79 +1,74 @@
 package main.entity;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-    private String name;
+    @Column(nullable = false, unique = true)
+    private String username;
 
-    private String userpic;
+    private String password;
 
-    private String email;
+    @ElementCollection(fetch = FetchType.EAGER)
+    private List<String> roles = new ArrayList<>();
 
-    private String gender;
-
-    private String locale;
-
-    private LocalDateTime lastVisit;
-
-    public String getId() {
-        return id;
+    public List<String> getRoles() {
+        return roles;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public User() {}
+
+    public User(String username, String password, List<String> roles) {
+        this.username = username;
+        this.password = password;
+        this.roles = roles;
     }
 
-    public String getName() {
-        return name;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
     }
 
-    public void setName(String name) {
-        this.name = name;
+    @Override
+    public String getPassword() {
+        return password;
     }
 
-    public String getUserpic() {
-        return userpic;
+    @Override
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserpic(String userpic) {
-        this.userpic = userpic;
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
-    public String getEmail() {
-        return email;
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
     }
 
-    public String getGender() {
-        return gender;
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
-    public String getLocale() {
-        return locale;
-    }
-
-    public void setLocale(String locale) {
-        this.locale = locale;
-    }
-
-    public LocalDateTime getLastVisit() {
-        return lastVisit;
-    }
-
-    public void setLastVisit(LocalDateTime lastVisit) {
-        this.lastVisit = lastVisit;
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }

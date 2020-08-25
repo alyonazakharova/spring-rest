@@ -63,7 +63,7 @@ Vue.component('sale-row', {
     props: ['sale', 'editMethod', 'sales'],
     template:
         '<div>' +
-        '<i>{{ sale.id }})</i> {{ sale.good.name }} {{ sale.goodCount }} {{ sale.createDate }}' +
+        '<i>{{ sale.id }})</i>  {{ sale.good.name }}    {{ sale.goodCount }}    {{ sale.createDate }}' +
         '<span style="position: absolute; right: 0">' +
         '<input type="button" value="W1" @click="w1"/>' +
         '<input type="button" value="W2" @click="w2"/>' +
@@ -114,6 +114,7 @@ var sales = new Vue({
     template:
         '<div>' +
         '<h3>All sales:</h3>' +
+        '<h5>id     good_id     good_count      create_date</h5>' +
         '<sales-list :sales="sales"/>' +
         '</div>',
     data: {

@@ -22,6 +22,16 @@ public class Warehouse1ServiceImpl implements Warehouse1Service {
     }
 
     @Override
+    public Warehouse1 find(Integer id) {
+        Optional<Warehouse1> optionalW1 = warehouse1Repository.findById(id);
+        if (optionalW1.isPresent()) {
+            return optionalW1.get();
+        } else {
+            throw new GoodNotFoundException("Good not found in warehouse 1");
+        }
+    }
+
+    @Override
     public Warehouse1 addGood(Warehouse1 w1Good) {
         return warehouse1Repository.save(w1Good);
     }
@@ -35,12 +45,16 @@ public class Warehouse1ServiceImpl implements Warehouse1Service {
             w1.setGoodCount(w1Good.getGoodCount());
             return warehouse1Repository.saveAndFlush(w1);
         } else {
-            throw new GoodNotFoundException("Good not found in warehouse1");
+            throw new GoodNotFoundException("Good not found in warehouse 1");
         }
     }
 
     @Override
     public void deleteGood(Integer id) {
-        //как должно все удаляться???
+        try {
+            warehouse1Repository.deleteById(id);
+        } catch (Exception e) {
+            throw new GoodNotFoundException("Good not found in warehouse 1");
+        }
     }
 }

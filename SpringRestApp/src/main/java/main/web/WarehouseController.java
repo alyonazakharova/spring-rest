@@ -36,6 +36,15 @@ public class WarehouseController {
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
+    @DeleteMapping("/warehouse1/{id}")
+    public void deleteGoodFromW1(@PathVariable("id") int id, @RequestBody Warehouse1 w1Good) {
+        try {
+            warehouse1Service.deleteGood(id);
+        } catch (GoodNotFoundException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Good not found in warehouse 1");
+        }
+    }
+
     @PostMapping("/warehouse1")
     public Warehouse1 addGoodToW1(@RequestBody Warehouse1 w1Good) {
         return warehouse1Service.addGood(w1Good);
@@ -67,6 +76,15 @@ public class WarehouseController {
     public Warehouse2 updateGoodInW2(@PathVariable("id") int id, @RequestBody Warehouse2 w2Good) {
         try {
             return warehouse2Service.updateGood(id, w2Good);
+        } catch (GoodNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Good not found in warehouse 2");
+        }
+    }
+
+    @DeleteMapping("/warehouse2/{id}")
+    public void deleteGoodFromW2(@PathVariable("id") int id) {
+        try {
+            warehouse2Service.deleteGood(id);
         } catch (GoodNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Good not found in warehouse 2");
         }
