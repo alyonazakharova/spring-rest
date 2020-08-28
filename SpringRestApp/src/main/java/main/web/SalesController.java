@@ -2,6 +2,7 @@ package main.web;
 
 import main.entity.Sale;
 import main.exception.SaleNotFoundException;
+import main.dto.SaleDto;
 import main.service.SaleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/sales")
@@ -17,24 +19,32 @@ public class SalesController {
 
     private SaleService saleService;
 
+    @Autowired
+    public void setSaleService(SaleService saleService) {
+        this.saleService = saleService;
+    }
+
     @GetMapping
-    public ResponseEntity<List<Sale>> getAllSales() {
+    public ResponseEntity<List<SaleDto>> getAllSales() {
         List<Sale> list = saleService.listSales();
-        return new ResponseEntity<>(list, HttpStatus.OK);
+        List<SaleDto> salesList = list.stream()
+                .map(SaleDto::new)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(salesList, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public Sale getSale(@PathVariable("id") int id) {
+    public SaleDto getSale(@PathVariable("id") int id) {
         try {
-            return saleService.find(id);
+            return new SaleDto(saleService.find(id));
         } catch (SaleNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sale not found");
         }
     }
 
     @PostMapping
-    public Sale addSale(@RequestBody Sale sale) {
-        return saleService.add(sale);
+    public SaleDto addSale(@RequestBody Sale sale) {
+        return new SaleDto(saleService.add(sale));
     }
 
     @DeleteMapping("/{id}")
@@ -47,16 +57,11 @@ public class SalesController {
     }
 
     @PutMapping("/{id}")
-    public Sale updateSale(@PathVariable("id") int id, @RequestBody Sale sale) {
+    public SaleDto updateSale(@PathVariable("id") int id, @RequestBody Sale sale) {
         try {
-            return saleService.update(id, sale);
+            return new SaleDto(saleService.update(id, sale));
         } catch (SaleNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sale not found");
         }
-    }
-
-    @Autowired
-    public void setSaleService(SaleService saleService) {
-        this.saleService = saleService;
     }
 }

@@ -1,6 +1,5 @@
 package main.service;
 
-import main.entity.Good;
 import main.entity.Warehouse1;
 
 import java.util.List;

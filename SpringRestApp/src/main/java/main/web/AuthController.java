@@ -1,5 +1,7 @@
 package main.web;
 
+import main.entity.User;
+import main.exception.InvalidCredentialsException;
 import main.repository.UserRepository;
 import main.security.jwt.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -29,10 +33,23 @@ public class AuthController {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    PasswordEncoder pwdEncoder;
+
     @PostMapping("/signin")
     public ResponseEntity signIn(@RequestBody AuthRequest request) {
         try {
             String name = request.getUserName();
+            Optional<User> optionalUser = userRepository.findUserByUsername(name);
+            if (optionalUser.isPresent()) {
+                User user = optionalUser.get();
+                if (!pwdEncoder.matches(request.getPassword(), user.getPassword())) {
+                    throw new InvalidCredentialsException("Invalid password");
+                }
+            } else {
+                throw new UsernameNotFoundException("User not found");
+            }
+
             String token = jwtTokenProvider.createToken(
                     name,
                     userRepository.findUserByUsername(name)

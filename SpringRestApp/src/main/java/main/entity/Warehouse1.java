@@ -10,7 +10,7 @@ public class Warehouse1 {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "good_id")
+    @JoinColumn(name = "good_id", unique = true)
     private Good good;
 
     @Column(name = "good_count")

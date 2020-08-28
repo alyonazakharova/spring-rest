@@ -17,6 +17,11 @@ public class GoodsController {
 
     private GoodService goodService;
 
+    @Autowired
+    public void setGoodService(GoodService goodService) {
+        this.goodService = goodService;
+    }
+
     @GetMapping
     public List<Good> getAllGoods() {
         return goodService.list();
@@ -53,10 +58,5 @@ public class GoodsController {
         } catch (GoodNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Good not found");
         }
-    }
-
-    @Autowired
-    public void setGoodService(GoodService goodService) {
-        this.goodService = goodService;
     }
 }

@@ -1,9 +1,12 @@
 package main.web;
 
-import main.entity.Sale;
+import main.dto.Warehouse1Dto;
+import main.dto.Warehouse2Dto;
+import main.entity.Good;
 import main.entity.Warehouse1;
 import main.entity.Warehouse2;
 import main.exception.GoodNotFoundException;
+import main.service.GoodService;
 import main.service.Warehouse1Service;
 import main.service.Warehouse2Service;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class WarehouseController {
@@ -30,10 +34,21 @@ public class WarehouseController {
         this.warehouse2Service = warehouse2Service;
     }
 
+    private GoodService goodService;
+
+    @Autowired
+    public void setGoodService(GoodService goodService) {
+        this.goodService = goodService;
+    }
+
+
     @GetMapping("/warehouse1")
-    public ResponseEntity<List<Warehouse1>> getGoodsFromW1() {
+    public ResponseEntity<List<Warehouse1Dto>> getGoodsFromW1() {
         List<Warehouse1> list = warehouse1Service.listGoods();
-        return new ResponseEntity<>(list, HttpStatus.OK);
+        List<Warehouse1Dto> w1List = list.stream()
+                .map(Warehouse1Dto::new)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(w1List, HttpStatus.OK);
     }
 
     @DeleteMapping("/warehouse1/{id}")
@@ -62,9 +77,12 @@ public class WarehouseController {
 
 
     @GetMapping("/warehouse2")
-    public ResponseEntity<List<Warehouse2>> getGoodsFromW2() {
+    public ResponseEntity<List<Warehouse2Dto>> getGoodsFromW2() {
         List<Warehouse2> list = warehouse2Service.listGoods();
-        return new ResponseEntity<>(list, HttpStatus.OK);
+        List<Warehouse2Dto> w2List = list.stream()
+                .map(Warehouse2Dto::new)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(w2List, HttpStatus.OK);
     }
 
     @PostMapping("/warehouse2")

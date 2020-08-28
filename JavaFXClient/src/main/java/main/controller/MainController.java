@@ -4,16 +4,12 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import main.model.Goods;
-import main.model.Sales;
-import main.model.Warehouse1;
-import main.model.Warehouse2;
+import main.dto.*;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,16 +24,16 @@ public class MainController {
 
 
     @FXML
-    private TableView<Goods> goodsTable;
+    private TableView<Good> goodsTable;
 
     @FXML
-    private TableColumn<Goods, Integer> idColumn;
+    private TableColumn<Good, Integer> idColumn;
 
     @FXML
-    private TableColumn<Goods, String> nameColumn;
+    private TableColumn<Good, String> nameColumn;
 
     @FXML
-    private TableColumn<Goods, Double> priorityColumn;
+    private TableColumn<Good, Double> priorityColumn;
 
     @FXML
     private TextField nameField;
@@ -58,19 +54,19 @@ public class MainController {
     private Label goodsInfoLabel;
 
     @FXML
-    private TableView<Sales> salesTable;
+    private TableView<SaleDto> salesTable;
 
     @FXML
-    private TableColumn<Sales, Integer> salesIdColumn;
+    private TableColumn<SaleDto, Integer> salesIdColumn;
 
     @FXML
-    private TableColumn<Sales, Goods> salesGoodIdColumn;
+    private TableColumn<SaleDto, Integer> salesGoodIdColumn;
 
     @FXML
-    private TableColumn<Sales, Integer> salesGoodCountColumn;
+    private TableColumn<SaleDto, Integer> salesGoodCountColumn;
 
     @FXML
-    private TableColumn<Sales, LocalDateTime> createDateColumn;
+    private TableColumn<SaleDto, LocalDateTime> createDateColumn;
 
     @FXML
     private Button salesW1Btn;
@@ -79,16 +75,19 @@ public class MainController {
     private Button salesW2Btn;
 
     @FXML
-    private TableView<Warehouse1> w1Table;
+    private Label salesInfoLabel;
 
     @FXML
-    private TableColumn<Warehouse1, Integer> w1IdColumn;
+    private TableView<Warehouse1Dto> w1Table;
 
     @FXML
-    private TableColumn<Warehouse1, Integer> w1GoodIdColumn;
+    private TableColumn<Warehouse1Dto, Integer> w1IdColumn;
 
     @FXML
-    private TableColumn<Warehouse1, CriteriaBuilder.In> w1GoodCountColumn;
+    private TableColumn<Warehouse1Dto, Integer> w1GoodIdColumn;
+
+    @FXML
+    private TableColumn<Warehouse1Dto, Integer> w1GoodCountColumn;
 
     @FXML
     private TextField w1GoodIdField;
@@ -106,16 +105,19 @@ public class MainController {
     private Button w1DeleteButton;
 
     @FXML
-    private TableView<Warehouse2> w2Table;
+    private Label w1InfoLabel;
 
     @FXML
-    private TableColumn<Warehouse2, Integer> w2IdColumn;
+    private TableView<Warehouse2Dto> w2Table;
 
     @FXML
-    private TableColumn<Warehouse2, Integer> w2GoodIdColumn;
+    private TableColumn<Warehouse2Dto, Integer> w2IdColumn;
 
     @FXML
-    private TableColumn<Warehouse2, Integer> w2GoodCountColumn;
+    private TableColumn<Warehouse2Dto, Integer> w2GoodIdColumn;
+
+    @FXML
+    private TableColumn<Warehouse2Dto, Integer> w2GoodCountColumn;
 
     @FXML
     private TextField w2GoodIdField;
@@ -132,6 +134,9 @@ public class MainController {
     @FXML
     private Button w2DeleteBtn;
 
+    @FXML
+    private Label w2InfoLabel;
+
 
     public void getAllGoods() {
         RestTemplate restTemplate = new RestTemplate();
@@ -143,10 +148,10 @@ public class MainController {
 
         List<Map<String, Object>> result = (List<Map<String, Object>>) response.getBody();
 
-        List<Goods> goods = new ArrayList<>();
+        List<Good> goods = new ArrayList<>();
         if (result != null) {
             for (Map<String, Object> item : result) {
-                goods.add(new Goods((Integer)item.get("id"),
+                goods.add(new Good((Integer)item.get("id"),
                                     (String)item.get("name"),
                                     (Double)item.get("priority")));
             }
@@ -165,38 +170,98 @@ public class MainController {
 
         List<Map<String, Object>> result = (List<Map<String, Object>>) response.getBody();
 
-        List<Sales> sales = new ArrayList<>();
+        List<SaleDto> sales = new ArrayList<>();
         if (result != null) {
             for (Map<String, Object> item : result) {
-                sales.add(new Sales((Integer)item.get("id"),
-                        (Goods) item.get("goodId"),
+                sales.add(new SaleDto((Integer)item.get("id"),
+                        (Integer) item.get("goodId"),
                         (Integer) item.get("goodCount"),
-                        (LocalDateTime)item.get("createDate")));
+                        LocalDateTime.parse((String) item.get("createDate"))));
             }
         }
 
         salesTable.setItems(FXCollections.observableList(sales));
     }
 
+    public void getAllGoodsFromWarehouse1() {
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<Object> response = restTemplate.exchange(
+                URL_WAREHOUSE_1,
+                HttpMethod.GET,
+                null,
+                Object.class);
+
+        List<Map<String, Object>> result = (List<Map<String, Object>>) response.getBody();
+
+        List<Warehouse1Dto> goodsFromW1 = new ArrayList<>();
+        if (result != null) {
+            for (Map<String, Object> item : result) {
+                goodsFromW1.add(new Warehouse1Dto((Integer) item.get("id"),
+                        (Integer) item.get("goodId"),
+                        (Integer) item.get("goodCount")));
+            }
+        }
+
+        w1Table.setItems(FXCollections.observableList(goodsFromW1));
+    }
+
+    public void getAllGoodsFromWarehouse2() {
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<Object> response = restTemplate.exchange(
+                URL_WAREHOUSE_2,
+                HttpMethod.GET,
+                null,
+                Object.class);
+
+        List<Map<String, Object>> result = (List<Map<String, Object>>) response.getBody();
+
+        List<Warehouse2Dto> goodsFromW2 = new ArrayList<>();
+        if (result != null) {
+            for (Map<String, Object> item : result) {
+                goodsFromW2.add(new Warehouse2Dto((Integer) item.get("id"),
+                        (Integer) item.get("goodId"),
+                        (Integer) item.get("goodCount")));
+            }
+        }
+
+        w2Table.setItems(FXCollections.observableList(goodsFromW2));
+    }
+
+//    public int findWarehouseIdByGoodId(String url, int goodId) {
+//
+//    }
+
 
     @FXML
     void initialize() {
 
-        idColumn.setCellValueFactory(new PropertyValueFactory<Goods, Integer>("id"));
-        nameColumn.setCellValueFactory(new PropertyValueFactory<Goods, String>("name"));
-        priorityColumn.setCellValueFactory(new PropertyValueFactory<Goods, Double>("priority"));
+        idColumn.setCellValueFactory(new PropertyValueFactory<Good, Integer>("id"));
+        nameColumn.setCellValueFactory(new PropertyValueFactory<Good, String>("name"));
+        priorityColumn.setCellValueFactory(new PropertyValueFactory<Good, Double>("priority"));
 
         getAllGoods();
 
-//        salesIdColumn.setCellValueFactory(new PropertyValueFactory<Sales, Integer>("id"));
-//        salesGoodIdColumn.setCellValueFactory(new PropertyValueFactory<Sales, Goods>("goodId"));
-//        salesGoodCountColumn.setCellValueFactory(new PropertyValueFactory<Sales, Integer>("goodCount"));
-//        createDateColumn.setCellValueFactory(new PropertyValueFactory<Sales, LocalDateTime>("createDate"));
-//
-//        getAllSales();
+        salesIdColumn.setCellValueFactory(new PropertyValueFactory<SaleDto, Integer>("id"));
+        salesGoodIdColumn.setCellValueFactory(new PropertyValueFactory<SaleDto, Integer>("goodId"));
+        salesGoodCountColumn.setCellValueFactory(new PropertyValueFactory<SaleDto, Integer>("goodCount"));
+        createDateColumn.setCellValueFactory(new PropertyValueFactory<SaleDto, LocalDateTime>("createDate"));
+
+        getAllSales();
+
+        w1IdColumn.setCellValueFactory(new PropertyValueFactory<Warehouse1Dto, Integer>("id"));
+        w1GoodIdColumn.setCellValueFactory(new PropertyValueFactory<Warehouse1Dto, Integer>("goodId"));
+        w1GoodCountColumn.setCellValueFactory(new PropertyValueFactory<Warehouse1Dto, Integer>("goodCount"));
+
+        getAllGoodsFromWarehouse1();
+
+        w2IdColumn.setCellValueFactory(new PropertyValueFactory<Warehouse2Dto, Integer>("id"));
+        w2GoodIdColumn.setCellValueFactory(new PropertyValueFactory<Warehouse2Dto, Integer>("goodId"));
+        w2GoodCountColumn.setCellValueFactory(new PropertyValueFactory<Warehouse2Dto, Integer>("goodCount"));
+
+        getAllGoodsFromWarehouse2();
 
         saveBtn.setOnAction(actionEvent -> {
-            if (!nameField.getText().isEmpty() && !priorityColumn.getText().isEmpty()) {
+            if (!nameField.getText().isEmpty() && !priorityField.getText().isEmpty()) {
                 String name = nameField.getText();
                 double priority = 0;
                 try {
@@ -207,16 +272,19 @@ public class MainController {
                 }
 
                 RestTemplate restTemplate = new RestTemplate();
-                HttpEntity<Goods> request = new HttpEntity<>(new Goods(name, priority));
-                Goods g = restTemplate.postForObject(URL_GOODS, request, Goods.class);
+                HttpEntity<Good> request = new HttpEntity<>(new Good(name, priority));
+                Good g = restTemplate.postForObject(URL_GOODS, request, Good.class);
             }
             goodsInfoLabel.setText("Good was successfully added");
             getAllGoods();
+
+            nameField.setText("");
+            priorityField.setText("");
         });
 
         updateBtn.setOnAction(actionEvent -> {
             if (!nameField.getText().isEmpty() && !priorityField.getText().isEmpty()) {
-                Goods selectedGood = goodsTable.getSelectionModel().getSelectedItem();
+                Good selectedGood = goodsTable.getSelectionModel().getSelectedItem();
                 if (selectedGood != null) {
 
                     String name = nameField.getText();
@@ -229,12 +297,15 @@ public class MainController {
                     }
 
                     RestTemplate restTemplate = new RestTemplate();
-                    HttpEntity<Goods> request = new HttpEntity<>(new Goods(name, priority));
+                    HttpEntity<Good> request = new HttpEntity<>(new Good(name, priority));
                     String url = URL_GOODS + "/" + selectedGood.getId();
-                    restTemplate.exchange(url, HttpMethod.PUT, request, Goods.class);
+                    restTemplate.exchange(url, HttpMethod.PUT, request, Good.class);
 
                     goodsInfoLabel.setText("Item was successfully updated");
                     getAllGoods();
+
+                    nameField.setText("");
+                    priorityField.setText("");
                 } else {
                     goodsInfoLabel.setText("An item must be selected");
                 }
@@ -242,7 +313,7 @@ public class MainController {
         });
 
         deleteBtn.setOnAction(actionEvent -> {
-            Goods selectedGood = goodsTable.getSelectionModel().getSelectedItem();
+            Good selectedGood = goodsTable.getSelectionModel().getSelectedItem();
 
             if (selectedGood != null) {
                 RestTemplate restTemplate = new RestTemplate();
@@ -260,5 +331,155 @@ public class MainController {
                 goodsInfoLabel.setText("An item must be selected");
             }
         });
+
+        salesW1Btn.setOnAction(actionEvent -> {
+            SaleDto selected = salesTable.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+
+
+            } else {
+                salesInfoLabel.setText("An item must be selected");
+            }
+        });
+
+        salesW2Btn.setOnAction(actionEvent -> {
+
+        });
+
+        w1SaveBtn.setOnAction(actionEvent -> {
+            if (!w1GoodIdField.getText().isEmpty() && !w1GoodCountField.getText().isEmpty()) {
+                int id, count;
+                try {
+                    id = Integer.parseInt(w1GoodIdField.getText());
+                    count = Integer.parseInt(w1GoodCountField.getText());
+                } catch (NumberFormatException e) {
+                    w1InfoLabel.setText("Id and quantity must be integer");
+                    return;
+                }
+
+                RestTemplate restTemplate = new RestTemplate();
+                Good good;
+                try {
+                    good = restTemplate.getForObject(URL_GOODS + "/" + id, Good.class);
+                } catch (Exception e) {
+                    w1InfoLabel.setText("There is no good with such id");
+                    return;
+                }
+
+                HttpEntity<Warehouse1> request = new HttpEntity<>(new Warehouse1(good, count));
+                try {
+                    restTemplate.postForEntity(URL_WAREHOUSE_1, request, Warehouse1.class);
+                } catch (Exception e) {
+                    w1InfoLabel.setText("There is already an item with such good_id");
+                    return;
+                }
+
+
+                w1InfoLabel.setText("Added successfully");
+                getAllGoodsFromWarehouse1();
+
+                w1GoodIdField.setText("");
+                w1GoodCountField.setText("");
+            } else {
+                w1InfoLabel.setText("Good id and quantity are required");
+            }
+        });
+
+        w1UpdateBtn.setOnAction(actionEvent -> {
+            if (!w1GoodCountField.getText().isEmpty()) {
+                Warehouse1Dto selected = w1Table.getSelectionModel().getSelectedItem();
+                if (selected != null) {
+                    int count;
+                    try {
+                        count = Integer.parseInt(w1GoodCountField.getText());
+                    } catch (NumberFormatException e) {
+                        w1InfoLabel.setText("Id and quantity must be integer");
+                        return;
+                    }
+
+                    RestTemplate restTemplate = new RestTemplate();
+                    int id = selected.getGoodId();
+                    Good good = restTemplate.getForObject(URL_GOODS + "/" + id, Good.class);
+                    HttpEntity<Warehouse1> request = new HttpEntity<>(new Warehouse1(good, count));
+                    restTemplate.exchange(URL_WAREHOUSE_1 + "/" + selected.getId(), HttpMethod.PUT, request, Warehouse1.class);
+
+                    w1InfoLabel.setText("Updated successfully");
+                    getAllGoodsFromWarehouse1();
+
+                    w1GoodCountField.setText("");
+
+                } else {
+                    w1InfoLabel.setText("An item must be selected");
+                }
+            } else {
+                w1InfoLabel.setText("Provide good quantity");
+            }
+        });
+
+        w2SaveBtn.setOnAction(actionEvent -> {
+            if (!w2GoodIdField.getText().isEmpty() && !w2GoodCountField.getText().isEmpty()) {
+                int id, count;
+                try {
+                    id = Integer.parseInt(w2GoodIdField.getText());
+                    count = Integer.parseInt(w2GoodCountField.getText());
+                } catch (NumberFormatException e) {
+                    w2InfoLabel.setText("Id and quantity must be integer");
+                    return;
+                }
+
+                RestTemplate restTemplate = new RestTemplate();
+                Good good;
+                try {
+                    good = restTemplate.getForObject(URL_GOODS + "/" + id, Good.class);
+                } catch (Exception e) {
+                    w2InfoLabel.setText("There is no good with this id");
+                    return;
+                }
+
+                HttpEntity<Warehouse2> request = new HttpEntity<>(new Warehouse2(good, count));
+                restTemplate.postForEntity(URL_WAREHOUSE_2, request, Warehouse2.class);
+
+                w2InfoLabel.setText("Added successfully");
+                getAllGoodsFromWarehouse2();
+
+                w2GoodIdField.setText("");
+                w2GoodCountField.setText("");
+            } else {
+                w2InfoLabel.setText("Good id and quantity are required");
+            }
+        });
+
+        w2UpdateBtn.setOnAction(actionEvent -> {
+            w2InfoLabel.setText("");
+            if (!w2GoodCountField.getText().isEmpty()) {
+                Warehouse2Dto selected = w2Table.getSelectionModel().getSelectedItem();
+                if (selected != null) {
+                    int count;
+                    try {
+                        count = Integer.parseInt(w2GoodCountField.getText());
+                    } catch (NumberFormatException e) {
+                        w2InfoLabel.setText("Id and quantity must be integer");
+                        return;
+                    }
+
+                    RestTemplate restTemplate = new RestTemplate();
+                    int id = selected.getGoodId();
+                    Good good = restTemplate.getForObject(URL_GOODS + "/" + id, Good.class);
+                    HttpEntity<Warehouse2> request = new HttpEntity<>(new Warehouse2(good, count));
+                    restTemplate.exchange(URL_WAREHOUSE_2 + "/" + selected.getId(), HttpMethod.PUT, request, Warehouse2.class);
+
+                    w2InfoLabel.setText("Updated successfully");
+                    getAllGoodsFromWarehouse2();
+
+                    w2GoodCountField.setText("");
+
+                } else {
+                    w2InfoLabel.setText("An item must be selected");
+                }
+            } else {
+                w2InfoLabel.setText("Provide good quantity");
+            }
+        });
+
     }
 }
