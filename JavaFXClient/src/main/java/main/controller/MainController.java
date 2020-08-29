@@ -1,3 +1,81 @@
+//package main.controller;
+//
+//import java.io.IOException;
+//import java.net.URL;
+//import java.time.LocalDateTime;
+//import java.util.ArrayList;
+//import java.util.List;
+//import java.util.ResourceBundle;
+//
+//import javafx.collections.FXCollections;
+//import javafx.fxml.FXML;
+//import javafx.fxml.FXMLLoader;
+//import javafx.scene.control.Tab;
+//import javafx.scene.control.TableColumn;
+//import javafx.scene.control.TableView;
+//import javafx.scene.control.cell.PropertyValueFactory;
+//import javafx.scene.layout.AnchorPane;
+//import main.dto.*;
+//import org.springframework.http.HttpEntity;
+//import org.springframework.http.HttpMethod;
+//import org.springframework.http.ResponseEntity;
+//import org.springframework.web.client.RestTemplate;
+//
+//public class MainController {
+//
+//    @FXML
+//    private Tab goodsTab;
+//
+//    @FXML
+//    private Tab salesTab;
+//
+//    @FXML
+//    private Tab warehouse1Tab;
+//
+//    @FXML
+//    private Tab warehouse2Tab;
+//
+//    @FXML
+//    void initialize() {
+//
+//        FXMLLoader loader = new FXMLLoader();
+//
+//        try {
+//            AnchorPane anchorPane1 = loader.load(getClass().getResource("src/main/resources/goods.fxml"));
+//            goodsTab.setContent(anchorPane1);
+//        } catch (IOException e) {
+//            System.out.println("File not found");
+//        }
+//
+//        loader = new FXMLLoader();
+//        try {
+//            AnchorPane anchorPane2 = loader.load(getClass().getResource("src/main/resources/sales.fxml"));
+//            salesTab.setContent(anchorPane2);
+//        } catch (IOException e) {
+//            System.out.println("File not found");
+//        }
+//
+//        loader = new FXMLLoader();
+//        try {
+//            AnchorPane anchorPane3 = loader.load(getClass().getResource("src/main/resources/warehouse1.fxml"));
+//
+//            warehouse1Tab.setContent(anchorPane3);
+//        } catch (IOException e) {
+//            System.out.println("File not found");
+//        }
+//
+//        loader = new FXMLLoader();
+//        try {
+//            AnchorPane anchorPane4 = loader.load(getClass().getResource("src/main/resources/warehouse2.fxml"));
+//            warehouse2Tab.setContent(anchorPane4);
+//        } catch (IOException e) {
+//            System.out.println("File not found");
+//        }
+//    }
+//}
+
+
+
 package main.controller;
 
 import javafx.collections.FXCollections;
@@ -5,9 +83,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import main.dto.*;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -22,6 +99,7 @@ public class MainController {
     private String URL_WAREHOUSE_1 = "http://localhost:8080/warehouse1";
     private String URL_WAREHOUSE_2 = "http://localhost:8080/warehouse2";
 
+    private String token = LoginController.jwtToken;
 
     @FXML
     private TableView<Good> goodsTable;
@@ -52,6 +130,13 @@ public class MainController {
 
     @FXML
     private Label goodsInfoLabel;
+
+
+    @FXML
+    private TextField quatityField;
+
+    @FXML
+    private Button createSaleBtn;
 
     @FXML
     private TableView<SaleDto> salesTable;
@@ -137,8 +222,7 @@ public class MainController {
     @FXML
     private Label w2InfoLabel;
 
-
-    public void getAllGoods() {
+    public List<Good> getGoodsList() {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<Object> response = restTemplate.exchange(
                 URL_GOODS,
@@ -152,12 +236,16 @@ public class MainController {
         if (result != null) {
             for (Map<String, Object> item : result) {
                 goods.add(new Good((Integer)item.get("id"),
-                                    (String)item.get("name"),
-                                    (Double)item.get("priority")));
+                        (String)item.get("name"),
+                        (Double)item.get("priority")));
             }
         }
+        return goods;
+    }
 
-        goodsTable.setItems(FXCollections.observableList(goods));
+
+    public void showAllGoods() {
+        goodsTable.setItems(FXCollections.observableList(getGoodsList()));
     }
 
     public void getAllSales() {
@@ -227,10 +315,6 @@ public class MainController {
         w2Table.setItems(FXCollections.observableList(goodsFromW2));
     }
 
-//    public int findWarehouseIdByGoodId(String url, int goodId) {
-//
-//    }
-
 
     @FXML
     void initialize() {
@@ -239,7 +323,7 @@ public class MainController {
         nameColumn.setCellValueFactory(new PropertyValueFactory<Good, String>("name"));
         priorityColumn.setCellValueFactory(new PropertyValueFactory<Good, Double>("priority"));
 
-        getAllGoods();
+        showAllGoods();
 
         salesIdColumn.setCellValueFactory(new PropertyValueFactory<SaleDto, Integer>("id"));
         salesGoodIdColumn.setCellValueFactory(new PropertyValueFactory<SaleDto, Integer>("goodId"));
@@ -259,8 +343,10 @@ public class MainController {
         w2GoodCountColumn.setCellValueFactory(new PropertyValueFactory<Warehouse2Dto, Integer>("goodCount"));
 
         getAllGoodsFromWarehouse2();
-
+        
         saveBtn.setOnAction(actionEvent -> {
+            System.out.println("TOKEN: " + token);
+
             if (!nameField.getText().isEmpty() && !priorityField.getText().isEmpty()) {
                 String name = nameField.getText();
                 double priority = 0;
@@ -272,11 +358,20 @@ public class MainController {
                 }
 
                 RestTemplate restTemplate = new RestTemplate();
-                HttpEntity<Good> request = new HttpEntity<>(new Good(name, priority));
-                Good g = restTemplate.postForObject(URL_GOODS, request, Good.class);
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                headers.set("Authorization", token);
+                HttpEntity<Good> request = new HttpEntity<>(new Good(name, priority), headers);
+
+                try {
+                    restTemplate.postForObject(URL_GOODS, request, Good.class);
+                } catch (HttpClientErrorException.Forbidden e) {
+                    goodsInfoLabel.setText("Not autorized to perform this action");
+                    return;
+                }
             }
             goodsInfoLabel.setText("Good was successfully added");
-            getAllGoods();
+            showAllGoods();
 
             nameField.setText("");
             priorityField.setText("");
@@ -302,7 +397,7 @@ public class MainController {
                     restTemplate.exchange(url, HttpMethod.PUT, request, Good.class);
 
                     goodsInfoLabel.setText("Item was successfully updated");
-                    getAllGoods();
+                    showAllGoods();
 
                     nameField.setText("");
                     priorityField.setText("");
@@ -326,7 +421,40 @@ public class MainController {
                 }
 
                 goodsInfoLabel.setText("Item was successfully deleted");
-                getAllGoods();
+                showAllGoods();
+            } else {
+                goodsInfoLabel.setText("An item must be selected");
+            }
+        });
+
+        createSaleBtn.setOnAction(actionEvent -> {
+            Good selected = goodsTable.getSelectionModel().getSelectedItem();
+            int quantity = 0;
+            if (!quatityField.getText().isEmpty()){
+                try {
+                    quantity = Integer.parseInt(quatityField.getText());
+                } catch (NumberFormatException e) {
+                    goodsInfoLabel.setText("Quantity must be integer");
+                    return;
+                }
+            } else {
+                goodsInfoLabel.setText("Quantity must be specified");
+                return;
+            }
+            if (selected != null) {
+                RestTemplate restTemplate = new RestTemplate();
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                headers.set("Authorization", token);
+                HttpEntity<Sale> request = new HttpEntity<>(new Sale(selected, quantity, LocalDateTime.now()), headers);
+                try {
+                    restTemplate.postForObject(URL_SALES, request, Sale.class);
+                    goodsInfoLabel.setText("Sale was successfully created");
+                    getAllSales();
+                } catch (HttpClientErrorException.Forbidden e) {
+                    goodsInfoLabel.setText("Not autorized to perform this action");
+                    return;
+                }
             } else {
                 goodsInfoLabel.setText("An item must be selected");
             }
@@ -335,15 +463,135 @@ public class MainController {
         salesW1Btn.setOnAction(actionEvent -> {
             SaleDto selected = salesTable.getSelectionModel().getSelectedItem();
             if (selected != null) {
+                int saleId = selected.getId();
+                int goodId = selected.getGoodId();
+                int goodCount = selected.getGoodCount();
+
+                RestTemplate restTemplate = new RestTemplate();
+                ResponseEntity<Object> response = restTemplate.exchange(
+                        URL_WAREHOUSE_1,
+                        HttpMethod.GET,
+                        null,
+                        Object.class);
+
+                List<Map<String, Object>> result = (List<Map<String, Object>>) response.getBody();
+
+                List<Warehouse1Dto> goodsFromW1 = new ArrayList<>();
+                if (result != null) {
+                    for (Map<String, Object> item : result) {
+                        goodsFromW1.add(new Warehouse1Dto((Integer) item.get("id"),
+                                (Integer) item.get("goodId"),
+                                (Integer) item.get("goodCount")));
+                    }
+                }
+
+                int w1Id = 0;
+                int currentGoodCount = 0;
+
+                for (Warehouse1Dto item : goodsFromW1) {
+                    if (item.getGoodId() == goodId) {
+                        if (item.getGoodCount() < goodCount) {
+                            salesInfoLabel.setText("Not enough goods in warehouse 1");
+                            return;
+                        }
+                        w1Id = item.getId();
+                        currentGoodCount = item.getGoodCount();
+                        break;
+                    }
+                }
+
+                if (w1Id == 0) {
+                    salesInfoLabel.setText("There is no such good in warehouse 1");
+                    return;
+                }
+
+                restTemplate = new RestTemplate();
+                Good good = restTemplate.getForObject(URL_GOODS + "/" + goodId, Good.class);
+                HttpEntity<Warehouse1> request = new HttpEntity<>(new Warehouse1(good, currentGoodCount - goodCount));
+                restTemplate.exchange(URL_WAREHOUSE_1 + "/" + w1Id, HttpMethod.PUT, request, Warehouse1.class);
 
 
+                restTemplate = new RestTemplate();
+                try {
+                    restTemplate.delete(URL_SALES + "/" + saleId);
+                } catch (Exception e) {
+                    goodsInfoLabel.setText("This sale cannot be deleted");
+                    return;
+                }
+
+                getAllSales();
+                getAllGoodsFromWarehouse1();
+                salesInfoLabel.setText("Successfully sent from warehouse 1");
             } else {
                 salesInfoLabel.setText("An item must be selected");
             }
         });
 
         salesW2Btn.setOnAction(actionEvent -> {
+            SaleDto selected = salesTable.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                int saleId = selected.getId();
+                int goodId = selected.getGoodId();
+                int goodCount = selected.getGoodCount();
 
+                RestTemplate restTemplate = new RestTemplate();
+                ResponseEntity<Object> response = restTemplate.exchange(
+                        URL_WAREHOUSE_2,
+                        HttpMethod.GET,
+                        null,
+                        Object.class);
+
+                List<Map<String, Object>> result = (List<Map<String, Object>>) response.getBody();
+
+                List<Warehouse2Dto> goodsFromW2 = new ArrayList<>();
+                if (result != null) {
+                    for (Map<String, Object> item : result) {
+                        goodsFromW2.add(new Warehouse2Dto((Integer) item.get("id"),
+                                (Integer) item.get("goodId"),
+                                (Integer) item.get("goodCount")));
+                    }
+                }
+
+                int w2Id = 0;
+                int currentGoodCount = 0;
+
+                for (Warehouse2Dto item : goodsFromW2) {
+                    if (item.getGoodId() == goodId) {
+                        if (item.getGoodCount() < goodCount) {
+                            salesInfoLabel.setText("Not enough goods in warehouse 2");
+                            return;
+                        }
+                        w2Id = item.getId();
+                        currentGoodCount = item.getGoodCount();
+                        break;
+                    }
+                }
+
+                if (w2Id == 0) {
+                    salesInfoLabel.setText("There is no such good in warehouse 2");
+                    return;
+                }
+
+                restTemplate = new RestTemplate();
+                Good good = restTemplate.getForObject(URL_GOODS + "/" + goodId, Good.class);
+                HttpEntity<Warehouse2> request = new HttpEntity<>(new Warehouse2(good, currentGoodCount - goodCount));
+                restTemplate.exchange(URL_WAREHOUSE_2 + "/" + w2Id, HttpMethod.PUT, request, Warehouse2.class);
+
+
+                restTemplate = new RestTemplate();
+                try {
+                    restTemplate.delete(URL_SALES + "/" + saleId);
+                } catch (Exception e) {
+                    goodsInfoLabel.setText("This sale cannot be deleted");
+                    return;
+                }
+
+                getAllSales();
+                getAllGoodsFromWarehouse2();
+                salesInfoLabel.setText("Successfully sent from warehouse 2");
+            } else {
+                salesInfoLabel.setText("An item must be selected");
+            }
         });
 
         w1SaveBtn.setOnAction(actionEvent -> {
@@ -480,6 +728,5 @@ public class MainController {
                 w2InfoLabel.setText("Provide good quantity");
             }
         });
-
     }
 }

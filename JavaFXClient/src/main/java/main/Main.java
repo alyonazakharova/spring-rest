@@ -15,10 +15,11 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         FXMLLoader loader = new FXMLLoader();
-        FileInputStream input = new FileInputStream(new File("src/main/resources/main.fxml"));
+        FileInputStream input = new FileInputStream(new File("src/main/resources/login.fxml"));
         Parent root = loader.load(input);
 
         stage.setScene(new Scene(root, 606, 392));
+        stage.setTitle("Wholesale company");
         stage.show();
     }
 
