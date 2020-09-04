@@ -52,7 +52,7 @@ public class WarehouseController {
     }
 
     @DeleteMapping("/warehouse1/{id}")
-    public void deleteGoodFromW1(@PathVariable("id") int id, @RequestBody Warehouse1 w1Good) {
+    public void deleteGoodFromW1(@PathVariable("id") int id) {
         try {
             warehouse1Service.deleteGood(id);
         } catch (GoodNotFoundException e){

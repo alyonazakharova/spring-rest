@@ -11,14 +11,13 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import main.dto.Good;
 import main.dto.User;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.net.URL;
@@ -53,20 +52,24 @@ public class RegistrationController {
 
             if (!login.isEmpty() && !pwd1.isEmpty() && !pwd2.isEmpty()) {
                 if (pwd1.equals(pwd2)) {
-                    User user = new User (login, pwd1, Collections.singletonList("ROLE_USER"));
-
                     RestTemplate restTemplate = new RestTemplate();
-//                    HttpHeaders headers = new HttpHeaders();
-//                    headers.setContentType(MediaType.APPLICATION_JSON);
-
-                    HttpEntity<User> request = new HttpEntity<>(user);
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                    JSONObject userJson = new JSONObject();
+                    userJson.put("username", login);
+                    userJson.put("password", pwd1);
+                    userJson.put("roles", Collections.singletonList("ROLE_USER"));
+                    HttpEntity<String> request = new HttpEntity<>(userJson.toString(), headers);
                     try {
-//                        restTemplate.postForObject(URL_REGISTRATION, request, User.class);
-                        restTemplate.exchange(URL_REGISTRATION, HttpMethod.POST, request, User.class);
+                        restTemplate.postForEntity(URL_REGISTRATION, request, String.class);
                     } catch (Exception e) {
-                        signUpInfoLabel.setText(e.getMessage());
+                        signUpInfoLabel.setText("User with this username already exists ");
+                        signUpLoginField.setText("");
+                        signUpPwd1Field.setText("");
+                        signUpPwd2Field.setText("");
                         return;
                     }
+
                     registerBtn.getScene().getWindow().hide();
                     FXMLLoader loader = new FXMLLoader();
                     loader.setLocation(getClass().getResource("/login.fxml"));

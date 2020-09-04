@@ -26,7 +26,6 @@ public class GoodsController {
 
     private static String URL_GOODS = "http://localhost:8080/goods";
     private String URL_SALES = "http://localhost:8080/sales";
-    private String token = LoginController.jwtToken;
 
     @FXML
     private TableView<Good> goodsTable;
@@ -64,9 +63,6 @@ public class GoodsController {
     @FXML
     private Button createSaleBtn;
 
-//    List<Map<String, Object>> getResult(String url) {
-//
-//    }
 
     public List<Good> getGoodsList() {
         RestTemplate restTemplate = new RestTemplate();
@@ -124,18 +120,20 @@ public class GoodsController {
                 nameAndPriority = getNameAndPriority();
             } catch (InvalidTypeException | DataNotSpecifiedException e) {
                 goodsInfoLabel.setText(e.getMessage());
+                nameField.setText("");
+                priorityField.setText("");
                 return;
             }
 
             RestTemplate restTemplate = new RestTemplate();
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("Authorization", token);
+            HttpHeaders headers = MainController.createHeaders();
             HttpEntity<Good> request = new HttpEntity<>(new Good(nameAndPriority.getKey(), nameAndPriority.getValue()), headers);
             try {
                 restTemplate.postForObject(URL_GOODS, request, Good.class);
             } catch (HttpClientErrorException.Forbidden e) {
                 goodsInfoLabel.setText("Not autorized to perform this action");
+                nameField.setText("");
+                priorityField.setText("");
                 return;
             }
             goodsInfoLabel.setText("Good was successfully added");
@@ -157,14 +155,14 @@ public class GoodsController {
                 }
 
                 RestTemplate restTemplate = new RestTemplate();
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.APPLICATION_JSON);
-                headers.set("Authorization", token);
+                HttpHeaders headers = MainController.createHeaders();
                 HttpEntity<Good> request = new HttpEntity<>(new Good(nameAndPriority.getKey(),nameAndPriority.getValue()), headers);
                 try {
                     restTemplate.exchange(URL_GOODS + "/" + selectedGood.getId(),HttpMethod.PUT, request, Good.class);
                 } catch (HttpClientErrorException.Forbidden e) {
                     goodsInfoLabel.setText("Not autorized to perform this action");
+                    nameField.setText("");
+                    priorityField.setText("");
                     return;
                 }
                 goodsInfoLabel.setText("Item was successfully updated");
@@ -178,9 +176,7 @@ public class GoodsController {
             Good selectedGood = goodsTable.getSelectionModel().getSelectedItem();
             if (selectedGood != null) {
                 RestTemplate restTemplate = new RestTemplate();
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.APPLICATION_JSON);
-                headers.set("Authorization", token);
+                HttpHeaders headers = MainController.createHeaders();
                 HttpEntity request = new HttpEntity(headers);
                 try {
                     restTemplate.exchange(URL_GOODS + "/" + selectedGood.getId(), HttpMethod.DELETE, request, Void.class);
@@ -212,14 +208,11 @@ public class GoodsController {
             }
             if (selected != null) {
                 RestTemplate restTemplate = new RestTemplate();
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.APPLICATION_JSON);
-                headers.set("Authorization", token);
+                HttpHeaders headers = MainController.createHeaders();
                 HttpEntity<Sale> request = new HttpEntity<>(new Sale(selected, quantity, LocalDateTime.now()), headers);
                 try {
                     restTemplate.postForObject(URL_SALES, request, Sale.class);
                     goodsInfoLabel.setText("Sale was successfully created");
-//                    getAllSales();
                 } catch (HttpClientErrorException.Forbidden e) {
                     goodsInfoLabel.setText("Not autorized to perform this action");
                     return;

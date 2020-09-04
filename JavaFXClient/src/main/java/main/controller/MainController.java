@@ -5,12 +5,23 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.AnchorPane;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class MainController implements Initializable {
+public class MainController {
+
+    public static String token = LoginController.jwtToken;
+
+    static org.springframework.http.HttpHeaders createHeaders() {
+        org.springframework.http.HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", token);
+        return headers;
+    }
 
     @FXML
     private Tab goodsTab;
@@ -24,7 +35,6 @@ public class MainController implements Initializable {
     @FXML
     private Tab warehouse2Tab;
 
-    @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
         FXMLLoader loader = new FXMLLoader();

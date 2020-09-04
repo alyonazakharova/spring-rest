@@ -5,11 +5,14 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import main.dto.Good;
+import main.dto.Warehouse1Dto;
 import main.dto.Warehouse2;
 import main.dto.Warehouse2Dto;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -20,7 +23,6 @@ public class Warehouse2Controller {
 
     private static String URL_GOODS = "http://localhost:8080/goods";
     private String URL_WAREHOUSE_2 = "http://localhost:8080/warehouse2";
-    private String token = LoginController.jwtToken;
 
     @FXML
     private TableView<Warehouse2Dto> w2Table;
@@ -94,6 +96,8 @@ public class Warehouse2Controller {
                     count = Integer.parseInt(w2GoodCountField.getText());
                 } catch (NumberFormatException e) {
                     w2InfoLabel.setText("Id and quantity must be integer");
+                    w2GoodIdField.setText("");
+                    w2GoodCountField.setText("");
                     return;
                 }
 
@@ -103,15 +107,24 @@ public class Warehouse2Controller {
                     good = restTemplate.getForObject(URL_GOODS + "/" + id, Good.class);
                 } catch (Exception e) {
                     w2InfoLabel.setText("There is no good with this id");
+                    w2GoodIdField.setText("");
+                    w2GoodCountField.setText("");
                     return;
                 }
 
-                HttpEntity<Warehouse2> request = new HttpEntity<>(new Warehouse2(good, count));
-                restTemplate.postForEntity(URL_WAREHOUSE_2, request, Warehouse2.class);
+                HttpHeaders headers = MainController.createHeaders();
+                HttpEntity<Warehouse2> request = new HttpEntity<>(new Warehouse2(good, count), headers);
+                try {
+                    restTemplate.postForEntity(URL_WAREHOUSE_2, request, Warehouse2.class);
+                } catch (HttpClientErrorException.Forbidden e) {
+                    w2InfoLabel.setText("Not autorized to perform this action");
+                    w2GoodIdField.setText("");
+                    w2GoodCountField.setText("");
+                    return;
+                }
 
-                w2InfoLabel.setText("Added successfully");
                 getAllGoodsFromWarehouse2();
-
+                w2InfoLabel.setText("Added successfully");
                 w2GoodIdField.setText("");
                 w2GoodCountField.setText("");
             } else {
@@ -120,7 +133,6 @@ public class Warehouse2Controller {
         });
 
         w2UpdateBtn.setOnAction(actionEvent -> {
-            w2InfoLabel.setText("");
             if (!w2GoodCountField.getText().isEmpty()) {
                 Warehouse2Dto selected = w2Table.getSelectionModel().getSelectedItem();
                 if (selected != null) {
@@ -128,19 +140,27 @@ public class Warehouse2Controller {
                     try {
                         count = Integer.parseInt(w2GoodCountField.getText());
                     } catch (NumberFormatException e) {
-                        w2InfoLabel.setText("Id and quantity must be integer");
+                        w2InfoLabel.setText("Quantity must be integer");
+                        w2GoodCountField.setText("");
                         return;
                     }
 
                     RestTemplate restTemplate = new RestTemplate();
                     int id = selected.getGoodId();
                     Good good = restTemplate.getForObject(URL_GOODS + "/" + id, Good.class);
-                    HttpEntity<Warehouse2> request = new HttpEntity<>(new Warehouse2(good, count));
-                    restTemplate.exchange(URL_WAREHOUSE_2 + "/" + selected.getId(), HttpMethod.PUT, request, Warehouse2.class);
 
-                    w2InfoLabel.setText("Updated successfully");
+                    HttpHeaders headers = MainController.createHeaders();
+                    HttpEntity<Warehouse2> request = new HttpEntity<>(new Warehouse2(good, count), headers);
+                    try {
+                        restTemplate.exchange(URL_WAREHOUSE_2 + "/" + selected.getId(), HttpMethod.PUT, request, Warehouse2.class);
+                    } catch (HttpClientErrorException.Forbidden e) {
+                        w2InfoLabel.setText("Not autorized to perform this action");
+                        w2GoodCountField.setText("");
+                        return;
+                    }
+
                     getAllGoodsFromWarehouse2();
-
+                    w2InfoLabel.setText("Updated successfully");
                     w2GoodCountField.setText("");
 
                 } else {
@@ -152,7 +172,26 @@ public class Warehouse2Controller {
         });
 
         w2RefreshBtn.setOnAction(actionEvent -> {
+            w2InfoLabel.setText("");
             getAllGoodsFromWarehouse2();
+        });
+
+        w2DeleteBtn.setOnAction(actionEvent -> {
+            Warehouse2Dto selected = w2Table.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                RestTemplate restTemplate = new RestTemplate();
+                HttpHeaders headers = MainController.createHeaders();
+                HttpEntity request = new HttpEntity(headers);
+                try {
+                    restTemplate.exchange(URL_WAREHOUSE_2 + "/" + selected.getId(), HttpMethod.DELETE, request, Void.class);
+                    getAllGoodsFromWarehouse2();
+                    w2InfoLabel.setText("Item was successfully deleted");
+                } catch (HttpClientErrorException.Forbidden e) {
+                    w2InfoLabel.setText("Not autorized to perform this action");
+                }
+            } else {
+                w2InfoLabel.setText("An item must be selected");
+            }
         });
     }
 }

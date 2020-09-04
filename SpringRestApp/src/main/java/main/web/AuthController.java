@@ -2,10 +2,10 @@ package main.web;
 
 import main.entity.User;
 import main.exception.InvalidCredentialsException;
-import main.exception.UserAlreadyExistsException;
 import main.repository.UserRepository;
 import main.security.jwt.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -72,7 +73,7 @@ public class AuthController {
         String username = user.getUsername();
         Optional<User> optionalUser = userRepository.findUserByUsername(username);
         if (optionalUser.isPresent()) {
-            throw new UserAlreadyExistsException("User with this username already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User with this username already exists");
         } else {
             String password = user.getPassword();
             password = pwdEncoder.encode(password);

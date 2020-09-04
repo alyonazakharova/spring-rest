@@ -53,8 +53,8 @@ public class LoginController {
             return jwtToken;
         } catch (Exception e) {
             System.out.println("oopsie");
+            return "error";
         }
-        return "error";
     }
 
     @FXML
@@ -74,9 +74,12 @@ public class LoginController {
                     Parent root = loader.getRoot();
                     Stage stage = new Stage();
                     stage.setScene(new Scene(root));
+                    stage.setTitle("Wholesale company");
                     stage.show();
                 } else {
                     loginInfoLabel.setText("Invalid login or/and password");
+                    loginField.setText("");
+                    pwdField.setText("");
                 }
             }
         });
@@ -90,6 +93,7 @@ public class LoginController {
                 loader.load();
             } catch (IOException e) {
                 System.out.println("oopsie");
+                return;
             }
             Parent root = loader.getRoot();
             Stage stage = new Stage();

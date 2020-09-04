@@ -8,9 +8,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import main.dto.*;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -24,7 +23,6 @@ public class SalesController {
     private String URL_SALES = "http://localhost:8080/sales";
     private String URL_WAREHOUSE_1 = "http://localhost:8080/warehouse1";
     private String URL_WAREHOUSE_2 = "http://localhost:8080/warehouse2";
-    private String token = LoginController.jwtToken;
 
     @FXML
     private TableView<SaleDto> salesTable;
@@ -93,6 +91,7 @@ public class SalesController {
                 int goodCount = selected.getGoodCount();
 
                 RestTemplate restTemplate = new RestTemplate();
+
                 ResponseEntity<Object> response = restTemplate.exchange(
                         URL_WAREHOUSE_1,
                         HttpMethod.GET,
@@ -132,20 +131,26 @@ public class SalesController {
 
                 restTemplate = new RestTemplate();
                 Good good = restTemplate.getForObject(URL_GOODS + "/" + goodId, Good.class);
-                HttpEntity<Warehouse1> request = new HttpEntity<>(new Warehouse1(good, currentGoodCount - goodCount));
-                restTemplate.exchange(URL_WAREHOUSE_1 + "/" + w1Id, HttpMethod.PUT, request, Warehouse1.class);
-
-
+                HttpHeaders headers = MainController.createHeaders();
+                HttpEntity<Warehouse1> request = new HttpEntity<>(new Warehouse1(good, currentGoodCount - goodCount), headers);
+                try {
+                    restTemplate.exchange(URL_WAREHOUSE_1 + "/" + w1Id, HttpMethod.PUT, request, Warehouse1.class);
+                } catch (HttpClientErrorException.Forbidden e) {
+                    salesInfoLabel.setText("Not autorized to perform this action");
+                    return;
+                }
                 restTemplate = new RestTemplate();
                 try {
-                    restTemplate.delete(URL_SALES + "/" + saleId);
+                    restTemplate.exchange(URL_SALES + "/" + saleId, HttpMethod.DELETE, request, Void.class);
+                } catch (HttpClientErrorException.Forbidden e) {
+                    salesInfoLabel.setText("Not autorized to perform this action");
+                    return;
                 } catch (Exception e) {
                     salesInfoLabel.setText("This sale cannot be deleted");
                     return;
                 }
 
                 getAllSales();
-//                getAllGoodsFromWarehouse1();
                 salesInfoLabel.setText("Successfully sent from warehouse 1");
             } else {
                 salesInfoLabel.setText("An item must be selected");
@@ -199,20 +204,28 @@ public class SalesController {
 
                 restTemplate = new RestTemplate();
                 Good good = restTemplate.getForObject(URL_GOODS + "/" + goodId, Good.class);
-                HttpEntity<Warehouse2> request = new HttpEntity<>(new Warehouse2(good, currentGoodCount - goodCount));
-                restTemplate.exchange(URL_WAREHOUSE_2 + "/" + w2Id, HttpMethod.PUT, request, Warehouse2.class);
+                HttpHeaders headers = MainController.createHeaders();
+                HttpEntity<Warehouse2> request = new HttpEntity<>(new Warehouse2(good, currentGoodCount - goodCount), headers);
 
+                try {
+                    restTemplate.exchange(URL_WAREHOUSE_2 + "/" + w2Id, HttpMethod.PUT, request, Warehouse2.class);
+                } catch (HttpClientErrorException e) {
+                    salesInfoLabel.setText("Not autorized to perform this action");
+                    return;
+                }
 
                 restTemplate = new RestTemplate();
                 try {
-                    restTemplate.delete(URL_SALES + "/" + saleId);
+                    restTemplate.exchange(URL_SALES + "/" + saleId, HttpMethod.DELETE, request, Void.class);
+                } catch (HttpClientErrorException.Forbidden e) {
+                    salesInfoLabel.setText("Not autorized to perform this action");
+                    return;
                 } catch (Exception e) {
                     salesInfoLabel.setText("This sale cannot be deleted");
                     return;
                 }
 
                 getAllSales();
-//                getAllGoodsFromWarehouse2();
                 salesInfoLabel.setText("Successfully sent from warehouse 2");
             } else {
                 salesInfoLabel.setText("An item must be selected");
@@ -220,6 +233,7 @@ public class SalesController {
         });
 
         salesRefreshBtn.setOnAction(actionEvent -> {
+            salesInfoLabel.setText("");
             getAllSales();
         });
     }
