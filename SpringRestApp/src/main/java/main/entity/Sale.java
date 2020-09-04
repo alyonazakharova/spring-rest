@@ -61,14 +61,4 @@ public class Sale {
     public void setCreateDate(LocalDateTime createDate) {
         this.createDate = createDate;
     }
-
-    @Override
-    public String toString() {
-        return "Sale{" +
-                "id=" + id +
-                ", good=" + good +
-                ", goodCount=" + goodCount +
-                ", createDate=" + createDate +
-                '}';
-    }
 }

@@ -47,13 +47,4 @@ public class Warehouse2 {
     public void setGoodCount(Integer goodCount) {
         this.goodCount = goodCount;
     }
-
-    @Override
-    public String toString() {
-        return "Warehouse2{" +
-                "id=" + id +
-                ", good=" + good +
-                ", goodCount=" + goodCount +
-                '}';
-    }
 }

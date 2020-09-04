@@ -2,7 +2,6 @@ package main.web;
 
 import main.dto.Warehouse1Dto;
 import main.dto.Warehouse2Dto;
-import main.entity.Good;
 import main.entity.Warehouse1;
 import main.entity.Warehouse2;
 import main.exception.GoodNotFoundException;

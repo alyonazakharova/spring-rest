@@ -1,6 +1,9 @@
 package main;
 
-import main.entity.*;
+import main.entity.Good;
+import main.entity.Sale;
+import main.entity.Warehouse1;
+import main.entity.Warehouse2;
 import main.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -8,7 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 
 @Component
 public class TestDataInit implements CommandLineRunner {

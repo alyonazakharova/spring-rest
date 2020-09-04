@@ -2,7 +2,6 @@ package main.service.impl;
 
 import main.entity.Warehouse1;
 import main.exception.GoodNotFoundException;
-import main.repository.GoodRepository;
 import main.repository.Warehouse1Repository;
 import main.service.Warehouse1Service;
 import org.springframework.beans.factory.annotation.Autowired;
