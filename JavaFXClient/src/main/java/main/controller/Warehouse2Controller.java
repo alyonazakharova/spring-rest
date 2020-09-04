@@ -1,18 +1,8 @@
 package main.controller;
 
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import main.dto.Good;
 import main.dto.Warehouse2;
@@ -22,22 +12,15 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 public class Warehouse2Controller {
 
     private static String URL_GOODS = "http://localhost:8080/goods";
     private String URL_WAREHOUSE_2 = "http://localhost:8080/warehouse2";
-
-    private MainController mainController;
-
-    public void injectMainController(MainController mainController) {
-        this.mainController = mainController;
-    }
-
-    @FXML
-    private ResourceBundle resources;
-
-    @FXML
-    private URL location;
+    private String token = LoginController.jwtToken;
 
     @FXML
     private TableView<Warehouse2Dto> w2Table;
@@ -68,6 +51,9 @@ public class Warehouse2Controller {
 
     @FXML
     private Label w2InfoLabel;
+
+    @FXML
+    private Button w2RefreshBtn;
 
     public void getAllGoodsFromWarehouse2() {
         RestTemplate restTemplate = new RestTemplate();
@@ -163,6 +149,10 @@ public class Warehouse2Controller {
             } else {
                 w2InfoLabel.setText("Provide good quantity");
             }
+        });
+
+        w2RefreshBtn.setOnAction(actionEvent -> {
+            getAllGoodsFromWarehouse2();
         });
     }
 }

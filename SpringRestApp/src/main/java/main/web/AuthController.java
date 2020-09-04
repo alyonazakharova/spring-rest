@@ -2,6 +2,7 @@ package main.web;
 
 import main.entity.User;
 import main.exception.InvalidCredentialsException;
+import main.exception.UserAlreadyExistsException;
 import main.repository.UserRepository;
 import main.security.jwt.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +64,20 @@ public class AuthController {
             return ResponseEntity.ok(model);
         } catch (AuthenticationException e) {
             throw new BadCredentialsException("Invalid username or password");
+        }
+    }
+
+    @PostMapping("/signup")
+    public User signup(@RequestBody User user) {
+        String username = user.getUsername();
+        Optional<User> optionalUser = userRepository.findUserByUsername(username);
+        if (optionalUser.isPresent()) {
+            throw new UserAlreadyExistsException("User with this username already exists");
+        } else {
+            String password = user.getPassword();
+            password = pwdEncoder.encode(password);
+            user.setPassword(password);
+            return userRepository.save(user);
         }
     }
 }

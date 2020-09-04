@@ -17,13 +17,6 @@ public class Sale {
         this.createDate = createDate;
     }
 
-    public Sale(Integer id, Good good, Integer goodCount, LocalDateTime createDate) {
-        this.id = id;
-        this.good = good;
-        this.goodCount = goodCount;
-        this.createDate = createDate;
-    }
-
     public Integer getId() {
         return id;
     }

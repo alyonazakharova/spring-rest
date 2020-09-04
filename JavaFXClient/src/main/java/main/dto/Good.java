@@ -42,13 +42,4 @@ public class Good {
     public void setPriority(Double priority) {
         this.priority = priority;
     }
-
-    @Override
-    public String toString() {
-        return "Good{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", priority=" + priority +
-                '}';
-    }
 }

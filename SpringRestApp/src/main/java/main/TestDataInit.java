@@ -42,7 +42,7 @@ public class TestDataInit implements CommandLineRunner {
         warehouse1Repository.save(new Warehouse1(good1, 100));
         warehouse2Repository.save(new Warehouse2(good2, 200));
 
-        userRepository.save(new User("user", pwdEncoder.encode("pwd"), Collections.singletonList("ROLE_USER")));
-        userRepository.save(new User("admin", pwdEncoder.encode("apwd"), Collections.singletonList("ROLE_ADMIN")));
+//        userRepository.save(new User("user", pwdEncoder.encode("pwd"), Collections.singletonList("ROLE_USER")));
+//        userRepository.save(new User("admin", pwdEncoder.encode("apwd"), Collections.singletonList("ROLE_ADMIN")));
     }
 }
