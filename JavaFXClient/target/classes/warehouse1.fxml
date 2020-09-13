@@ -6,22 +6,35 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.controller.Warehouse1Controller">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: LINEN;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.controller.Warehouse1Controller">
     <children>
-        <TableView fx:id="w1Table" layoutX="14.0" layoutY="12.0" prefHeight="342.0" prefWidth="307.0">
+        <TableView fx:id="w1Table" layoutX="14.0" layoutY="25.0" prefHeight="350.0" prefWidth="310.0">
             <columns>
                 <TableColumn fx:id="w1IdColumn" prefWidth="75.0" text="id" />
                 <TableColumn fx:id="w1GoodIdColumn" prefWidth="75.0" text="good_id" />
                 <TableColumn fx:id="w1GoodCountColumn" prefWidth="156.0000030517578" text="good_count" />
             </columns>
         </TableView>
-        <TextField fx:id="w1GoodIdField" layoutX="357.0" layoutY="115.0" prefHeight="21.0" prefWidth="105.0" promptText="good_id" />
-        <TextField fx:id="w1GoodCountField" layoutX="472.0" layoutY="115.0" prefHeight="22.0" prefWidth="113.0" promptText="good_count" />
-        <Button fx:id="w1SaveBtn" layoutX="357.0" layoutY="151.0" mnemonicParsing="false" prefHeight="28.0" prefWidth="227.0" text="Save" />
-        <Button fx:id="w1UpdateBtn" layoutX="357.0" layoutY="190.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="227.0" text="Update" />
-        <Button fx:id="w1DeleteButton" layoutX="357.0" layoutY="227.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="226.0" text="Delete" />
-        <Label fx:id="w1InfoLabel" layoutX="357.0" layoutY="274.0" prefHeight="26.0" prefWidth="227.0" />
-      <Button fx:id="w1RefreshBtn" layoutX="357.0" layoutY="70.0" mnemonicParsing="false" prefHeight="14.0" prefWidth="226.0" text="Refresh" />
+        <TextField fx:id="w1GoodIdField" layoutX="353.0" layoutY="133.0" prefHeight="21.0" prefWidth="103.0" promptText="good_id" />
+        <TextField fx:id="w1GoodCountField" layoutX="465.0" layoutY="133.0" prefHeight="22.0" prefWidth="103.0" promptText="good_count" />
+        <Button fx:id="w1SaveBtn" layoutX="355.0" layoutY="174.0" mnemonicParsing="false" prefHeight="28.0" prefWidth="214.0" text="Save">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font></Button>
+        <Button fx:id="w1UpdateBtn" layoutX="355.0" layoutY="213.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="214.0" text="Update">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font></Button>
+        <Button fx:id="w1DeleteButton" layoutX="355.0" layoutY="252.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="214.0" style="-fx-background-color: SALMON;" text="Delete">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font></Button>
+        <Label fx:id="w1InfoLabel" layoutX="355.0" layoutY="60.0" prefHeight="26.0" prefWidth="214.0" />
+      <Button fx:id="w1RefreshBtn" layoutX="355.0" layoutY="25.0" mnemonicParsing="false" prefHeight="14.0" prefWidth="214.0" text="Refresh">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font></Button>
     </children>
 </AnchorPane>

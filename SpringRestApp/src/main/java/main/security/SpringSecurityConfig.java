@@ -32,7 +32,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/auth**").permitAll()
+                .antMatchers("/auth/signin").permitAll()
+                .antMatchers("/auth/signup").permitAll()
                 .antMatchers(HttpMethod.POST, "/goods").hasRole("ADMIN")
                 .antMatchers(HttpMethod.PUT, "/goods/{id}").hasRole("ADMIN")
                 .antMatchers(HttpMethod.DELETE, "/goods/{id}").hasRole("ADMIN")
@@ -41,8 +42,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/warehouse1/{id}").hasRole("ADMIN")
                 .antMatchers(HttpMethod.POST, "/warehouse2").hasRole("ADMIN")
                 .antMatchers("/warehouse2/{id}").hasRole("ADMIN")
-//                .anyRequest().authenticated()
-                .anyRequest().permitAll()
+                .anyRequest().authenticated()
                 .and()
                 .apply(new JwtSecurityConfigurer(jwtTokenProvider));
     }

@@ -53,10 +53,12 @@ public class SalesController {
 
     public void getAllSales() {
         RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = MainController.createHeaders();
+        HttpEntity request = new HttpEntity<>(headers);
         ResponseEntity<Object> response = restTemplate.exchange(
                 URL_SALES,
                 HttpMethod.GET,
-                null,
+                request,
                 Object.class);
 
         List<Map<String, Object>> result = (List<Map<String, Object>>) response.getBody();
@@ -81,7 +83,11 @@ public class SalesController {
         salesGoodIdColumn.setCellValueFactory(new PropertyValueFactory<SaleDto, Integer>("goodId"));
         salesGoodCountColumn.setCellValueFactory(new PropertyValueFactory<SaleDto, Integer>("goodCount"));
         createDateColumn.setCellValueFactory(new PropertyValueFactory<SaleDto, LocalDateTime>("createDate"));
+
         getAllSales();
+
+        HttpHeaders headers = MainController.createHeaders();
+        HttpEntity simpleRequest = new HttpEntity<>(headers);
 
         salesW1Btn.setOnAction(actionEvent -> {
             SaleDto selected = salesTable.getSelectionModel().getSelectedItem();
@@ -95,7 +101,7 @@ public class SalesController {
                 ResponseEntity<Object> response = restTemplate.exchange(
                         URL_WAREHOUSE_1,
                         HttpMethod.GET,
-                        null,
+                        simpleRequest,
                         Object.class);
 
                 List<Map<String, Object>> result = (List<Map<String, Object>>) response.getBody();
@@ -130,9 +136,16 @@ public class SalesController {
                 }
 
                 restTemplate = new RestTemplate();
-                Good good = restTemplate.getForObject(URL_GOODS + "/" + goodId, Good.class);
-                HttpHeaders headers = MainController.createHeaders();
+                ResponseEntity<Good> goodResponseEntity = restTemplate.exchange(
+                        URL_GOODS + "/" + goodId,
+                        HttpMethod.GET,
+                        simpleRequest,
+                        Good.class
+                );
+                Good good = goodResponseEntity.getBody();
+
                 HttpEntity<Warehouse1> request = new HttpEntity<>(new Warehouse1(good, currentGoodCount - goodCount), headers);
+
                 try {
                     restTemplate.exchange(URL_WAREHOUSE_1 + "/" + w1Id, HttpMethod.PUT, request, Warehouse1.class);
                 } catch (HttpClientErrorException.Forbidden e) {
@@ -168,7 +181,7 @@ public class SalesController {
                 ResponseEntity<Object> response = restTemplate.exchange(
                         URL_WAREHOUSE_2,
                         HttpMethod.GET,
-                        null,
+                        simpleRequest,
                         Object.class);
 
                 List<Map<String, Object>> result = (List<Map<String, Object>>) response.getBody();
@@ -203,8 +216,16 @@ public class SalesController {
                 }
 
                 restTemplate = new RestTemplate();
-                Good good = restTemplate.getForObject(URL_GOODS + "/" + goodId, Good.class);
-                HttpHeaders headers = MainController.createHeaders();
+
+                ResponseEntity<Good> goodResponseEntity = restTemplate.exchange(
+                        URL_GOODS + "/" + goodId,
+                        HttpMethod.GET,
+                        simpleRequest,
+                        Good.class
+
+                );
+                Good good = goodResponseEntity.getBody();
+
                 HttpEntity<Warehouse2> request = new HttpEntity<>(new Warehouse2(good, currentGoodCount - goodCount), headers);
 
                 try {

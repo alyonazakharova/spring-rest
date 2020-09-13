@@ -6,23 +6,36 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.controller.GoodsController">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: LINEN;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.controller.GoodsController">
     <children>
-        <TableView fx:id="goodsTable" layoutX="14.0" layoutY="14.0" prefHeight="328.0" prefWidth="342.0">
+        <TableView fx:id="goodsTable" layoutX="14.0" layoutY="25.0" prefHeight="350.0" prefWidth="342.0">
             <columns>
                 <TableColumn fx:id="idColumn" prefWidth="75.0" text="id" />
                 <TableColumn fx:id="nameColumn" prefWidth="159.199951171875" text="name" />
                 <TableColumn fx:id="priorityColumn" minWidth="0.0" prefWidth="108.80006408691406" text="priority" />
             </columns>
         </TableView>
-        <TextField fx:id="nameField" layoutX="371.0" layoutY="14.0" prefHeight="27.0" prefWidth="222.0" promptText="name" />
-        <TextField fx:id="priorityField" layoutX="371.0" layoutY="49.0" prefHeight="27.0" prefWidth="221.0" promptText="priority" />
-        <Button fx:id="saveBtn" layoutX="371.0" layoutY="85.0" mnemonicParsing="false" prefHeight="28.0" prefWidth="223.0" text="Save" />
-        <Button fx:id="deleteBtn" layoutX="371.0" layoutY="168.0" mnemonicParsing="false" prefHeight="24.0" prefWidth="223.0" text="Delete" />
-        <Button fx:id="updateBtn" layoutX="371.0" layoutY="127.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="224.0" text="Update" />
-        <Label fx:id="goodsInfoLabel" layoutX="371.0" layoutY="210.0" prefHeight="26.0" prefWidth="224.0" />
-        <TextField fx:id="quantityField" layoutX="372.0" layoutY="258.0" prefHeight="26.0" prefWidth="69.0" promptText="quantity" />
-        <Button fx:id="createSaleBtn" layoutX="446.0" layoutY="258.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="147.0" text="Create sale" />
+        <TextField fx:id="nameField" layoutX="370.0" layoutY="143.0" prefHeight="27.0" prefWidth="210.0" promptText="Name" />
+        <TextField fx:id="priorityField" layoutX="370.0" layoutY="178.0" prefHeight="27.0" prefWidth="210.0" promptText="Priority" />
+        <Button fx:id="saveBtn" layoutX="370.0" layoutY="214.0" mnemonicParsing="false" prefHeight="28.0" prefWidth="210.0" text="Save">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font></Button>
+        <Button fx:id="deleteBtn" layoutX="370.0" layoutY="286.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="210.0" style="-fx-background-color: SALMON;" text="Delete">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font></Button>
+        <Button fx:id="updateBtn" layoutX="369.0" layoutY="250.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="210.0" text="Update">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font></Button>
+        <Label fx:id="goodsInfoLabel" layoutX="370.0" layoutY="25.0" prefHeight="26.0" prefWidth="210.0" />
+        <TextField fx:id="quantityField" layoutX="370.0" layoutY="61.0" prefHeight="26.0" prefWidth="69.0" promptText="Quantity" />
+        <Button fx:id="createSaleBtn" layoutX="444.0" layoutY="61.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="136.0" style="-fx-background-color: CORNFLOWERBLUE;" text="Create sale">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font></Button>
     </children>
 </AnchorPane>

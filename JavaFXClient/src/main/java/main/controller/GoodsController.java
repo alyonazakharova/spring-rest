@@ -7,11 +7,7 @@ import java.util.Map;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Pair;
 import main.dto.Good;
@@ -66,10 +62,12 @@ public class GoodsController {
 
     public List<Good> getGoodsList() {
         RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = MainController.createHeaders();
+        HttpEntity request = new HttpEntity<>(headers);
         ResponseEntity<Object> response = restTemplate.exchange(
                 URL_GOODS,
                 HttpMethod.GET,
-                null,
+                request,
                 Object.class);
 
         List<Map<String, Object>> result = (List<Map<String, Object>>) response.getBody();
@@ -131,6 +129,7 @@ public class GoodsController {
             try {
                 restTemplate.postForObject(URL_GOODS, request, Good.class);
             } catch (HttpClientErrorException.Forbidden e) {
+//                Alert alert = new Alert(Alert.AlertType.ERROR, "You do not have permisson to perform this action");
                 goodsInfoLabel.setText("Not autorized to perform this action");
                 nameField.setText("");
                 priorityField.setText("");

@@ -7,12 +7,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import main.dto.Good;
 import main.dto.Warehouse1;
 import main.dto.Warehouse1Dto;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,24 +56,29 @@ public class Warehouse1Controller {
 
     public void getAllGoodsFromWarehouse1() {
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<Object> response = restTemplate.exchange(
-                URL_WAREHOUSE_1,
-                HttpMethod.GET,
-                null,
-                Object.class);
+        HttpHeaders headers = MainController.createHeaders();
+        HttpEntity request = new HttpEntity<>(headers);
+        try {
+            ResponseEntity<Object> response = restTemplate.exchange(
+                    URL_WAREHOUSE_1,
+                    HttpMethod.GET,
+                    request,
+                    Object.class);
 
-        List<Map<String, Object>> result = (List<Map<String, Object>>) response.getBody();
+            List<Map<String, Object>> result = (List<Map<String, Object>>) response.getBody();
 
-        List<Warehouse1Dto> goodsFromW1 = new ArrayList<>();
-        if (result != null) {
-            for (Map<String, Object> item : result) {
-                goodsFromW1.add(new Warehouse1Dto((Integer) item.get("id"),
-                        (Integer) item.get("goodId"),
-                        (Integer) item.get("goodCount")));
+            List<Warehouse1Dto> goodsFromW1 = new ArrayList<>();
+            if (result != null) {
+                for (Map<String, Object> item : result) {
+                    goodsFromW1.add(new Warehouse1Dto((Integer) item.get("id"),
+                            (Integer) item.get("goodId"),
+                            (Integer) item.get("goodCount")));
+                }
             }
+            w1Table.setItems(FXCollections.observableList(goodsFromW1));
+        } catch (Exception e) {
+            w1InfoLabel.setText("500?!");
         }
-
-        w1Table.setItems(FXCollections.observableList(goodsFromW1));
     }
 
     @FXML
@@ -86,6 +89,9 @@ public class Warehouse1Controller {
         w1GoodCountColumn.setCellValueFactory(new PropertyValueFactory<Warehouse1Dto, Integer>("goodCount"));
 
         getAllGoodsFromWarehouse1();
+
+        HttpHeaders headers = MainController.createHeaders();
+        HttpEntity simpleRequest = new HttpEntity<>(headers);
 
         w1SaveBtn.setOnAction(actionEvent -> {
             if (!w1GoodIdField.getText().isEmpty() && !w1GoodCountField.getText().isEmpty()) {
@@ -103,7 +109,13 @@ public class Warehouse1Controller {
                 RestTemplate restTemplate = new RestTemplate();
                 Good good;
                 try {
-                    good = restTemplate.getForObject(URL_GOODS + "/" + id, Good.class);
+                    ResponseEntity<Good> goodResponseEntity = restTemplate.exchange(
+                            URL_GOODS + "/" + id,
+                            HttpMethod.GET,
+                            simpleRequest,
+                            Good.class
+                    );
+                    good = goodResponseEntity.getBody();
                 } catch (Exception e) {
                     w1InfoLabel.setText("There is no good with such id");
                     w1GoodIdField.setText("");
@@ -111,7 +123,6 @@ public class Warehouse1Controller {
                     return;
                 }
 
-                HttpHeaders headers = MainController.createHeaders();
                 HttpEntity<Warehouse1> request = new HttpEntity<>(new Warehouse1(good, count), headers);
                 try {
                     restTemplate.postForEntity(URL_WAREHOUSE_1, request, Warehouse1.class);
@@ -148,10 +159,19 @@ public class Warehouse1Controller {
                     }
 
                     RestTemplate restTemplate = new RestTemplate();
-                    HttpHeaders headers = MainController.createHeaders();
                     int id = selected.getGoodId();
-                    Good good = restTemplate.getForObject(URL_GOODS + "/" + id, Good.class);
+
+                    ResponseEntity<Good> goodResponseEntity = restTemplate.exchange(
+                            URL_GOODS + "/" + id,
+                            HttpMethod.GET,
+                            simpleRequest,
+                            Good.class
+
+                    );
+                    Good good = goodResponseEntity.getBody();
+
                     HttpEntity<Warehouse1> request = new HttpEntity<>(new Warehouse1(good, count), headers);
+
                     try {
                         restTemplate.exchange(URL_WAREHOUSE_1 + "/" + selected.getId(), HttpMethod.PUT, request, Warehouse1.class);
                     } catch (HttpClientErrorException.Forbidden e) {
@@ -181,10 +201,8 @@ public class Warehouse1Controller {
             Warehouse1Dto selected = w1Table.getSelectionModel().getSelectedItem();
             if (selected != null) {
                 RestTemplate restTemplate = new RestTemplate();
-                HttpHeaders headers = MainController.createHeaders();
-                HttpEntity request = new HttpEntity(headers);
                 try {
-                    restTemplate.exchange(URL_WAREHOUSE_1 + "/" + selected.getId(), HttpMethod.DELETE, request, Void.class);
+                    restTemplate.exchange(URL_WAREHOUSE_1 + "/" + selected.getId(), HttpMethod.DELETE, simpleRequest, Void.class);
                     getAllGoodsFromWarehouse1();
                     w1InfoLabel.setText("Item was successfully deleted");
                 } catch (HttpClientErrorException.Forbidden e) {

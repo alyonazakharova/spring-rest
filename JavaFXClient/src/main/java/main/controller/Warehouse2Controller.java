@@ -59,10 +59,12 @@ public class Warehouse2Controller {
 
     public void getAllGoodsFromWarehouse2() {
         RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = MainController.createHeaders();
+        HttpEntity request = new HttpEntity<>(headers);
         ResponseEntity<Object> response = restTemplate.exchange(
                 URL_WAREHOUSE_2,
                 HttpMethod.GET,
-                null,
+                request,
                 Object.class);
 
         List<Map<String, Object>> result = (List<Map<String, Object>>) response.getBody();
@@ -88,6 +90,9 @@ public class Warehouse2Controller {
 
         getAllGoodsFromWarehouse2();
 
+        HttpHeaders headers = MainController.createHeaders();
+        HttpEntity simpleRequest = new HttpEntity<>(headers);
+
         w2SaveBtn.setOnAction(actionEvent -> {
             if (!w2GoodIdField.getText().isEmpty() && !w2GoodCountField.getText().isEmpty()) {
                 int id, count;
@@ -104,7 +109,14 @@ public class Warehouse2Controller {
                 RestTemplate restTemplate = new RestTemplate();
                 Good good;
                 try {
-                    good = restTemplate.getForObject(URL_GOODS + "/" + id, Good.class);
+                    ResponseEntity<Good> goodResponseEntity = restTemplate.exchange(
+                            URL_GOODS + "/" + id,
+                            HttpMethod.GET,
+                            simpleRequest,
+                            Good.class
+                    );
+                    good = goodResponseEntity.getBody();
+//                    good = restTemplate.getForObject(URL_GOODS + "/" + id, Good.class);
                 } catch (Exception e) {
                     w2InfoLabel.setText("There is no good with this id");
                     w2GoodIdField.setText("");
@@ -112,7 +124,6 @@ public class Warehouse2Controller {
                     return;
                 }
 
-                HttpHeaders headers = MainController.createHeaders();
                 HttpEntity<Warehouse2> request = new HttpEntity<>(new Warehouse2(good, count), headers);
                 try {
                     restTemplate.postForEntity(URL_WAREHOUSE_2, request, Warehouse2.class);
@@ -147,9 +158,16 @@ public class Warehouse2Controller {
 
                     RestTemplate restTemplate = new RestTemplate();
                     int id = selected.getGoodId();
-                    Good good = restTemplate.getForObject(URL_GOODS + "/" + id, Good.class);
 
-                    HttpHeaders headers = MainController.createHeaders();
+                    ResponseEntity<Good> goodResponseEntity = restTemplate.exchange(
+                            URL_GOODS + "/" + id,
+                            HttpMethod.GET,
+                            simpleRequest,
+                            Good.class
+                    );
+                    Good good = goodResponseEntity.getBody();
+//                    Good good = restTemplate.getForObject(URL_GOODS + "/" + id, Good.class);
+
                     HttpEntity<Warehouse2> request = new HttpEntity<>(new Warehouse2(good, count), headers);
                     try {
                         restTemplate.exchange(URL_WAREHOUSE_2 + "/" + selected.getId(), HttpMethod.PUT, request, Warehouse2.class);
@@ -180,10 +198,8 @@ public class Warehouse2Controller {
             Warehouse2Dto selected = w2Table.getSelectionModel().getSelectedItem();
             if (selected != null) {
                 RestTemplate restTemplate = new RestTemplate();
-                HttpHeaders headers = MainController.createHeaders();
-                HttpEntity request = new HttpEntity(headers);
                 try {
-                    restTemplate.exchange(URL_WAREHOUSE_2 + "/" + selected.getId(), HttpMethod.DELETE, request, Void.class);
+                    restTemplate.exchange(URL_WAREHOUSE_2 + "/" + selected.getId(), HttpMethod.DELETE, simpleRequest, Void.class);
                     getAllGoodsFromWarehouse2();
                     w2InfoLabel.setText("Item was successfully deleted");
                 } catch (HttpClientErrorException.Forbidden e) {

@@ -9,18 +9,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import main.dto.Good;
-import main.dto.User;
 import net.minidev.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.Collections;
 
 public class RegistrationController {
@@ -41,6 +36,9 @@ public class RegistrationController {
 
     @FXML
     private Button registerBtn;
+
+    @FXML
+    private Button closeBtn;
 
     @FXML
     void initialize() {
@@ -87,6 +85,21 @@ public class RegistrationController {
                     signUpInfoLabel.setText("Passwords do not match");
                 }
             }
+        });
+
+        closeBtn.setOnAction(actionEvent -> {
+            closeBtn.getScene().getWindow().hide();
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("/login.fxml"));
+            try {
+                loader.load();
+            } catch (IOException e) {
+                System.out.println("oopsie");
+            }
+            Parent root = loader.getRoot();
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.show();
         });
 
     }

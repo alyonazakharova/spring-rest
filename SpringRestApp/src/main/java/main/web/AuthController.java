@@ -64,7 +64,8 @@ public class AuthController {
 
             return ResponseEntity.ok(model);
         } catch (AuthenticationException e) {
-            throw new BadCredentialsException("Invalid username or password");
+//            throw new BadCredentialsException("Invalid username or password");
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
     }
 

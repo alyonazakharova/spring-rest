@@ -5,20 +5,30 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.controller.SalesController">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: LINEN;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.controller.SalesController">
     <children>
-        <TableView fx:id="salesTable" layoutX="14.0" layoutY="9.0" prefHeight="342.0" prefWidth="383.0">
+        <TableView fx:id="salesTable" layoutX="14.0" layoutY="25.0" prefHeight="350.0" prefWidth="383.0">
             <columns>
-                <TableColumn fx:id="salesIdColumn" prefWidth="63.999966621398926" text="id" />
-                <TableColumn fx:id="salesGoodIdColumn" prefWidth="62.39996337890625" text="good_id" />
-                <TableColumn fx:id="salesGoodCountColumn" prefWidth="83.20001220703125" text="good_count" />
-                <TableColumn fx:id="createDateColumn" prefWidth="180.00001525878906" text="create_date" />
+                <TableColumn fx:id="salesIdColumn" prefWidth="64.0" text="id" />
+                <TableColumn fx:id="salesGoodIdColumn" prefWidth="64.0" text="good_id" />
+                <TableColumn fx:id="salesGoodCountColumn" prefWidth="84.0" text="good_count" />
+                <TableColumn fx:id="createDateColumn" prefWidth="180.0" text="create_date" />
             </columns>
         </TableView>
-        <Button fx:id="salesW1Btn" layoutX="409.0" layoutY="109.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="174.0" text="Send from warehouse 1" />
-        <Button fx:id="salesW2Btn" layoutX="409.0" layoutY="149.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="174.0" text="Send from warehouse 2" />
-        <Label fx:id="salesInfoLabel" layoutX="410.0" layoutY="190.0" prefHeight="20.0" prefWidth="172.0" />
-      <Button fx:id="salesRefreshBtn" layoutX="410.0" layoutY="63.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="172.0" text="Refresh" />
+        <Button fx:id="salesW1Btn" layoutX="409.0" layoutY="149.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="174.0" text="Send from warehouse 1">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font></Button>
+        <Button fx:id="salesW2Btn" layoutX="409.0" layoutY="183.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="174.0" text="Send from warehouse 2">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font></Button>
+        <Label fx:id="salesInfoLabel" layoutX="410.0" layoutY="116.0" prefHeight="26.0" prefWidth="172.0" />
+      <Button fx:id="salesRefreshBtn" layoutX="410.0" layoutY="25.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="172.0" text="Refresh">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font></Button>
     </children>
 </AnchorPane>
