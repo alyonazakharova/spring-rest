@@ -117,7 +117,7 @@ public class GoodsController {
             try {
                 nameAndPriority = getNameAndPriority();
             } catch (InvalidTypeException | DataNotSpecifiedException e) {
-                goodsInfoLabel.setText(e.getMessage());
+                MainController.showInfo(e.getMessage(), Alert.AlertType.WARNING);
                 nameField.setText("");
                 priorityField.setText("");
                 return;
@@ -129,13 +129,16 @@ public class GoodsController {
             try {
                 restTemplate.postForObject(URL_GOODS, request, Good.class);
             } catch (HttpClientErrorException.Forbidden e) {
-//                Alert alert = new Alert(Alert.AlertType.ERROR, "You do not have permisson to perform this action");
-                goodsInfoLabel.setText("Not autorized to perform this action");
+                MainController.showInfo(MainController.FORBIDDEN_MSG, Alert.AlertType.ERROR);
                 nameField.setText("");
                 priorityField.setText("");
                 return;
+            } catch (HttpClientErrorException.Unauthorized e) {
+                MainController.showInfo(MainController.UNAUTORIZED_MSG, Alert.AlertType.ERROR);
+                return;
             }
-            goodsInfoLabel.setText("Good was successfully added");
+
+            MainController.showInfo("Good was successfully added", Alert.AlertType.INFORMATION);
             nameField.setText("");
             priorityField.setText("");
             showAllGoods();
@@ -149,7 +152,7 @@ public class GoodsController {
                 try {
                     nameAndPriority = getNameAndPriority();
                 } catch (InvalidTypeException | DataNotSpecifiedException e) {
-                    goodsInfoLabel.setText(e.getMessage());
+                    MainController.showInfo(e.getMessage(), Alert.AlertType.WARNING);
                     return;
                 }
 
@@ -159,12 +162,16 @@ public class GoodsController {
                 try {
                     restTemplate.exchange(URL_GOODS + "/" + selectedGood.getId(),HttpMethod.PUT, request, Good.class);
                 } catch (HttpClientErrorException.Forbidden e) {
-                    goodsInfoLabel.setText("Not autorized to perform this action");
+                    MainController.showInfo(MainController.FORBIDDEN_MSG, Alert.AlertType.ERROR);
                     nameField.setText("");
                     priorityField.setText("");
                     return;
+                } catch (HttpClientErrorException.Unauthorized e) {
+                    MainController.showInfo(MainController.FORBIDDEN_MSG, Alert.AlertType.ERROR);
+                    return;
                 }
-                goodsInfoLabel.setText("Item was successfully updated");
+
+                MainController.showInfo("Item was successfully updated", Alert.AlertType.INFORMATION);
                 nameField.setText("");
                 priorityField.setText("");
                 showAllGoods();
@@ -179,14 +186,18 @@ public class GoodsController {
                 HttpEntity request = new HttpEntity(headers);
                 try {
                     restTemplate.exchange(URL_GOODS + "/" + selectedGood.getId(), HttpMethod.DELETE, request, Void.class);
+                } catch (HttpClientErrorException.Unauthorized e) {
+                    MainController.showInfo(MainController.UNAUTORIZED_MSG, Alert.AlertType.ERROR);
+                    return;
                 } catch (Exception e) {
                     goodsInfoLabel.setText("This good cannot be deleted");
                     return;
                 }
-                goodsInfoLabel.setText("Item was successfully deleted");
+                
+                MainController.showInfo("Item was successfully deleted", Alert.AlertType.INFORMATION);
                 showAllGoods();
             } else {
-                goodsInfoLabel.setText("An item must be selected");
+                MainController.showInfo("An item must be selected", Alert.AlertType.WARNING);
             }
         });
 
@@ -198,11 +209,11 @@ public class GoodsController {
                 try {
                     quantity = Integer.parseInt(quantityField.getText());
                 } catch (NumberFormatException e) {
-                    goodsInfoLabel.setText("Quantity must be integer");
+                    MainController.showInfo("Quantity must be integer", Alert.AlertType.WARNING);
                     return;
                 }
             } else {
-                goodsInfoLabel.setText("Quantity must be specified");
+                MainController.showInfo("Quantity must be specified", Alert.AlertType.WARNING);
                 return;
             }
             if (selected != null) {
@@ -211,13 +222,16 @@ public class GoodsController {
                 HttpEntity<Sale> request = new HttpEntity<>(new Sale(selected, quantity, LocalDateTime.now()), headers);
                 try {
                     restTemplate.postForObject(URL_SALES, request, Sale.class);
-                    goodsInfoLabel.setText("Sale was successfully created");
+                    MainController.showInfo("Sale was successfully created", Alert.AlertType.INFORMATION);
                 } catch (HttpClientErrorException.Forbidden e) {
-                    goodsInfoLabel.setText("Not autorized to perform this action");
+                    MainController.showInfo(MainController.FORBIDDEN_MSG, Alert.AlertType.ERROR);
+                    return;
+                } catch (HttpClientErrorException.Unauthorized e) {
+                    MainController.showInfo(MainController.UNAUTORIZED_MSG, Alert.AlertType.ERROR);
                     return;
                 }
             } else {
-                goodsInfoLabel.setText("An item must be selected");
+                MainController.showInfo("An item must be selected", Alert.AlertType.WARNING);
             }
         });
     }

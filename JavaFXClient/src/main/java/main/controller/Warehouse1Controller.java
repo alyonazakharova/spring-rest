@@ -7,10 +7,12 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import main.dto.Good;
 import main.dto.Warehouse1;
 import main.dto.Warehouse1Dto;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,27 +60,29 @@ public class Warehouse1Controller {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = MainController.createHeaders();
         HttpEntity request = new HttpEntity<>(headers);
+        ResponseEntity<Object> response = null;
         try {
-            ResponseEntity<Object> response = restTemplate.exchange(
+            response = restTemplate.exchange(
                     URL_WAREHOUSE_1,
                     HttpMethod.GET,
                     request,
                     Object.class);
-
-            List<Map<String, Object>> result = (List<Map<String, Object>>) response.getBody();
-
-            List<Warehouse1Dto> goodsFromW1 = new ArrayList<>();
-            if (result != null) {
-                for (Map<String, Object> item : result) {
-                    goodsFromW1.add(new Warehouse1Dto((Integer) item.get("id"),
-                            (Integer) item.get("goodId"),
-                            (Integer) item.get("goodCount")));
-                }
-            }
-            w1Table.setItems(FXCollections.observableList(goodsFromW1));
-        } catch (Exception e) {
-            w1InfoLabel.setText("500?!");
+        } catch (HttpClientErrorException.Unauthorized e) {
+            MainController.showInfo(MainController.UNAUTORIZED_MSG, Alert.AlertType.ERROR);
+            return;
         }
+
+        List<Map<String, Object>> result = (List<Map<String, Object>>) response.getBody();
+
+        List<Warehouse1Dto> goodsFromW1 = new ArrayList<>();
+        if (result != null) {
+            for (Map<String, Object> item : result) {
+                goodsFromW1.add(new Warehouse1Dto((Integer) item.get("id"),
+                        (Integer) item.get("goodId"),
+                        (Integer) item.get("goodCount")));
+            }
+        }
+        w1Table.setItems(FXCollections.observableList(goodsFromW1));
     }
 
     @FXML
@@ -87,7 +91,6 @@ public class Warehouse1Controller {
         w1IdColumn.setCellValueFactory(new PropertyValueFactory<Warehouse1Dto, Integer>("id"));
         w1GoodIdColumn.setCellValueFactory(new PropertyValueFactory<Warehouse1Dto, Integer>("goodId"));
         w1GoodCountColumn.setCellValueFactory(new PropertyValueFactory<Warehouse1Dto, Integer>("goodCount"));
-
         getAllGoodsFromWarehouse1();
 
         HttpHeaders headers = MainController.createHeaders();
@@ -100,7 +103,7 @@ public class Warehouse1Controller {
                     id = Integer.parseInt(w1GoodIdField.getText());
                     count = Integer.parseInt(w1GoodCountField.getText());
                 } catch (NumberFormatException e) {
-                    w1InfoLabel.setText("Id and quantity must be integer");
+                    MainController.showInfo("Id and quantity must be integer", Alert.AlertType.WARNING);
                     w1GoodIdField.setText("");
                     w1GoodCountField.setText("");
                     return;
@@ -113,10 +116,12 @@ public class Warehouse1Controller {
                             URL_GOODS + "/" + id,
                             HttpMethod.GET,
                             simpleRequest,
-                            Good.class
-                    );
+                            Good.class);
                     good = goodResponseEntity.getBody();
-                } catch (Exception e) {
+                } catch (HttpClientErrorException.Unauthorized e) {
+                    MainController.showInfo(MainController.UNAUTORIZED_MSG, Alert.AlertType.ERROR);
+                    return;
+                } catch (Exception e) { //???
                     w1InfoLabel.setText("There is no good with such id");
                     w1GoodIdField.setText("");
                     w1GoodCountField.setText("");
@@ -126,10 +131,13 @@ public class Warehouse1Controller {
                 HttpEntity<Warehouse1> request = new HttpEntity<>(new Warehouse1(good, count), headers);
                 try {
                     restTemplate.postForEntity(URL_WAREHOUSE_1, request, Warehouse1.class);
-                } catch (HttpClientErrorException e) {
-                    w1InfoLabel.setText("Not autorized to perform this action");
+                } catch (HttpClientErrorException.Forbidden e) {
+                    MainController.showInfo(MainController.FORBIDDEN_MSG, Alert.AlertType.ERROR);
                     w1GoodIdField.setText("");
                     w1GoodCountField.setText("");
+                    return;
+                } catch (HttpClientErrorException.Unauthorized e) {
+                    MainController.showInfo(MainController.UNAUTORIZED_MSG, Alert.AlertType.ERROR);
                     return;
                 } catch (Exception e) {
                     w1InfoLabel.setText("There is already an item with such good_id");
@@ -137,11 +145,11 @@ public class Warehouse1Controller {
                 }
 
                 getAllGoodsFromWarehouse1();
-                w1InfoLabel.setText("Added successfully");
+                MainController.showInfo("Added successfully", Alert.AlertType.CONFIRMATION);
                 w1GoodIdField.setText("");
                 w1GoodCountField.setText("");
             } else {
-                w1InfoLabel.setText("Good id and quantity are required");
+                MainController.showInfo("Good id and quantity are required", Alert.AlertType.WARNING);
             }
         });
 
@@ -153,7 +161,7 @@ public class Warehouse1Controller {
                     try {
                         count = Integer.parseInt(w1GoodCountField.getText());
                     } catch (NumberFormatException e) {
-                        w1InfoLabel.setText("Quantity must be integer");
+                        MainController.showInfo("Quantity must be integer", Alert.AlertType.WARNING);
                         w1GoodCountField.setText("");
                         return;
                     }
@@ -161,13 +169,17 @@ public class Warehouse1Controller {
                     RestTemplate restTemplate = new RestTemplate();
                     int id = selected.getGoodId();
 
-                    ResponseEntity<Good> goodResponseEntity = restTemplate.exchange(
-                            URL_GOODS + "/" + id,
-                            HttpMethod.GET,
-                            simpleRequest,
-                            Good.class
-
-                    );
+                    ResponseEntity<Good> goodResponseEntity = null;
+                    try {
+                        goodResponseEntity = restTemplate.exchange(
+                                URL_GOODS + "/" + id,
+                                HttpMethod.GET,
+                                simpleRequest,
+                                Good.class);
+                    } catch (HttpClientErrorException.Unauthorized e) {
+                        MainController.showInfo(MainController.UNAUTORIZED_MSG, Alert.AlertType.ERROR);
+                        return;
+                    }
                     Good good = goodResponseEntity.getBody();
 
                     HttpEntity<Warehouse1> request = new HttpEntity<>(new Warehouse1(good, count), headers);
@@ -175,20 +187,22 @@ public class Warehouse1Controller {
                     try {
                         restTemplate.exchange(URL_WAREHOUSE_1 + "/" + selected.getId(), HttpMethod.PUT, request, Warehouse1.class);
                     } catch (HttpClientErrorException.Forbidden e) {
-                        w1InfoLabel.setText("Not autorized to perform this action");
+                        MainController.showInfo(MainController.FORBIDDEN_MSG, Alert.AlertType.ERROR);
                         w1GoodCountField.setText("");
+                        return;
+                    } catch (HttpClientErrorException.Unauthorized e) {
+                        MainController.showInfo(MainController.UNAUTORIZED_MSG, Alert.AlertType.ERROR);
                         return;
                     }
 
                     getAllGoodsFromWarehouse1();
-                    w1InfoLabel.setText("Updated successfully");
+                    MainController.showInfo("Updated successfully", Alert.AlertType.INFORMATION);
                     w1GoodCountField.setText("");
-
                 } else {
-                    w1InfoLabel.setText("An item must be selected");
+                    MainController.showInfo("An item must be selected", Alert.AlertType.WARNING);
                 }
             } else {
-                w1InfoLabel.setText("Provide good quantity");
+                MainController.showInfo("Quantity is required", Alert.AlertType.WARNING);
             }
         });
 
@@ -204,12 +218,14 @@ public class Warehouse1Controller {
                 try {
                     restTemplate.exchange(URL_WAREHOUSE_1 + "/" + selected.getId(), HttpMethod.DELETE, simpleRequest, Void.class);
                     getAllGoodsFromWarehouse1();
-                    w1InfoLabel.setText("Item was successfully deleted");
+                    MainController.showInfo("Item was successfully deleted", Alert.AlertType.INFORMATION);
                 } catch (HttpClientErrorException.Forbidden e) {
-                    w1InfoLabel.setText("Not autorized to perform this action");
+                    MainController.showInfo(MainController.FORBIDDEN_MSG, Alert.AlertType.ERROR);
+                } catch (HttpClientErrorException.Unauthorized e) {
+                    MainController.showInfo(MainController.UNAUTORIZED_MSG, Alert.AlertType.ERROR);
                 }
             } else {
-                w1InfoLabel.setText("An item must be selected");
+                MainController.showInfo("An item must be selected", Alert.AlertType.WARNING);
             }
         });
     }

@@ -3,8 +3,11 @@ package main.controller;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
@@ -21,6 +24,26 @@ public class MainController {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", token);
         return headers;
+    }
+
+    static String FORBIDDEN_MSG = "You do not have permission to perform this action";
+    static String UNAUTORIZED_MSG = "Session time is over.\nPlease, re-login.";
+
+    static void showInfo(String message,
+                         Alert.AlertType alertType) {
+
+        Alert alert = new Alert(alertType);
+        alert.setHeaderText(null);
+        TextArea textArea = new TextArea();
+        textArea.setWrapText(true);
+        textArea.setText(message);
+        textArea.setEditable(false);
+        VBox vBox = new VBox();
+        vBox.getChildren().add(textArea);
+        alert.getDialogPane().setMaxWidth(300);
+        alert.getDialogPane().setMaxHeight(150);
+        alert.getDialogPane().setContent(textArea);
+        alert.showAndWait();
     }
 
     @FXML
