@@ -13,8 +13,8 @@
         <TableView fx:id="w2Table" layoutX="14.0" layoutY="25.0" prefHeight="350.0" prefWidth="310.0">
             <columns>
                 <TableColumn fx:id="w2IdColumn" prefWidth="75.0" text="id" />
-                <TableColumn fx:id="w2GoodIdColumn" prefWidth="96.79998779296875" text="good_id" />
-                <TableColumn fx:id="w2GoodCountColumn" prefWidth="137.6000274658203" text="good_count" />
+                <TableColumn fx:id="w2GoodIdColumn" prefWidth="75.0" text="good_id" />
+                <TableColumn fx:id="w2GoodCountColumn" prefWidth="156.0000030517578" text="good_count" />
             </columns>
         </TableView>
         <TextField fx:id="w2GoodIdField" layoutX="353.0" layoutY="133.0" prefHeight="26.0" prefWidth="103.0" promptText="good_id" />

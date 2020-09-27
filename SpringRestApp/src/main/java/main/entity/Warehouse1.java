@@ -1,5 +1,8 @@
 package main.entity;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
 
 @Entity
@@ -11,6 +14,7 @@ public class Warehouse1 {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "good_id", unique = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Good good;
 
     @Column(name = "good_count")

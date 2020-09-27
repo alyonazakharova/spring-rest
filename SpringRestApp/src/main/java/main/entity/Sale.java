@@ -1,5 +1,8 @@
 package main.entity;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -13,6 +16,7 @@ public class Sale {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "good_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Good good;
 
     @Column(name = "good_count")
