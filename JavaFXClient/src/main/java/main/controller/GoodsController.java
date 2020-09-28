@@ -186,14 +186,13 @@ public class GoodsController {
                 HttpEntity request = new HttpEntity(headers);
                 try {
                     restTemplate.exchange(URL_GOODS + "/" + selectedGood.getId(), HttpMethod.DELETE, request, Void.class);
+                } catch (HttpClientErrorException.Forbidden e) {
+                    MainController.showInfo(MainController.FORBIDDEN_MSG, Alert.AlertType.ERROR);
+                    return;
                 } catch (HttpClientErrorException.Unauthorized e) {
                     MainController.showInfo(MainController.UNAUTORIZED_MSG, Alert.AlertType.ERROR);
                     return;
-                } catch (Exception e) {
-                    goodsInfoLabel.setText("This good cannot be deleted");
-                    return;
                 }
-                
                 MainController.showInfo("Item was successfully deleted", Alert.AlertType.INFORMATION);
                 showAllGoods();
             } else {
