@@ -51,9 +51,6 @@ public class Warehouse2Controller {
     private Button w2DeleteBtn;
 
     @FXML
-    private Label w2InfoLabel;
-
-    @FXML
     private Button w2RefreshBtn;
 
     public void getAllGoodsFromWarehouse2() {
@@ -97,15 +94,17 @@ public class Warehouse2Controller {
         HttpEntity simpleRequest = new HttpEntity<>(headers);
 
         w2SaveBtn.setOnAction(actionEvent -> {
-            if (!w2GoodIdField.getText().isEmpty() && !w2GoodCountField.getText().isEmpty()) {
+            String goodId = w2GoodIdField.getText();
+            String goodCount = w2GoodCountField.getText();
+            w2GoodIdField.setText("");
+            w2GoodCountField.setText("");
+            if (!goodId.isEmpty() && !goodCount.isEmpty()) {
                 int id, count;
                 try {
-                    id = Integer.parseInt(w2GoodIdField.getText());
-                    count = Integer.parseInt(w2GoodCountField.getText());
+                    id = Integer.parseInt(goodId);
+                    count = Integer.parseInt(goodCount);
                 } catch (NumberFormatException e) {
                     MainController.showInfo("Id and quantity must be integer", Alert.AlertType.WARNING);
-                    w2GoodIdField.setText("");
-                    w2GoodCountField.setText("");
                     return;
                 }
 
@@ -122,9 +121,7 @@ public class Warehouse2Controller {
                     MainController.showInfo(MainController.UNAUTORIZED_MSG, Alert.AlertType.ERROR);
                     return;
                 } catch (Exception e) {
-                    w2InfoLabel.setText("There is no good with this id");
-                    w2GoodIdField.setText("");
-                    w2GoodCountField.setText("");
+                    MainController.showInfo("There is no good with this id", Alert.AlertType.WARNING);
                     return;
                 }
 
@@ -133,18 +130,17 @@ public class Warehouse2Controller {
                     restTemplate.postForEntity(URL_WAREHOUSE_2, request, Warehouse2.class);
                 } catch (HttpClientErrorException.Forbidden e) {
                     MainController.showInfo(MainController.FORBIDDEN_MSG, Alert.AlertType.ERROR);
-                    w2GoodIdField.setText("");
-                    w2GoodCountField.setText("");
                     return;
                 } catch (HttpClientErrorException.Unauthorized e) {
                     MainController.showInfo(MainController.UNAUTORIZED_MSG, Alert.AlertType.ERROR);
+                    return;
+                } catch (Exception e) {
+                    MainController.showInfo("There is already an item with such good_id", Alert.AlertType.ERROR);
                     return;
                 }
 
                 getAllGoodsFromWarehouse2();
                 MainController.showInfo("Added successfully", Alert.AlertType.INFORMATION);
-                w2GoodIdField.setText("");
-                w2GoodCountField.setText("");
             } else {
                 MainController.showInfo("Good id and quantity are required", Alert.AlertType.WARNING);
             }
@@ -203,7 +199,6 @@ public class Warehouse2Controller {
         });
 
         w2RefreshBtn.setOnAction(actionEvent -> {
-            w2InfoLabel.setText("");
             getAllGoodsFromWarehouse2();
         });
 

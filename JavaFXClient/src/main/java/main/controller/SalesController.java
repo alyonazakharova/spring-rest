@@ -46,9 +46,6 @@ public class SalesController {
     private Button salesW2Btn;
 
     @FXML
-    private Label salesInfoLabel;
-
-    @FXML
     private Button salesRefreshBtn;
 
     public void getAllSales() {
@@ -165,9 +162,6 @@ public class SalesController {
                 } catch (HttpClientErrorException.Unauthorized e) {
                     MainController.showInfo(MainController.UNAUTORIZED_MSG, Alert.AlertType.ERROR);
                     return;
-                } catch (Exception e) {
-                    salesInfoLabel.setText("This sale cannot be deleted");
-                    return;
                 }
 
                 getAllSales();
@@ -249,9 +243,6 @@ public class SalesController {
                 } catch (HttpClientErrorException e) {
                     MainController.showInfo(MainController.UNAUTORIZED_MSG, Alert.AlertType.ERROR);
                     return;
-                } catch (Exception e) {
-                    salesInfoLabel.setText("This sale cannot be deleted");
-                    return;
                 }
 
                 getAllSales();
@@ -262,7 +253,6 @@ public class SalesController {
         });
 
         salesRefreshBtn.setOnAction(actionEvent -> {
-            salesInfoLabel.setText("");
             getAllSales();
         });
     }

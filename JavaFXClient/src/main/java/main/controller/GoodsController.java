@@ -51,9 +51,6 @@ public class GoodsController {
     private Button updateBtn;
 
     @FXML
-    private Label goodsInfoLabel;
-
-    @FXML
     private TextField quantityField;
 
     @FXML
@@ -232,6 +229,7 @@ public class GoodsController {
             } else {
                 MainController.showInfo("An item must be selected", Alert.AlertType.WARNING);
             }
+            quantityField.setText("");
         });
     }
 }

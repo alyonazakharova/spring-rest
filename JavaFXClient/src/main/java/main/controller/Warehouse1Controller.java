@@ -51,9 +51,6 @@ public class Warehouse1Controller {
     private Button w1DeleteButton;
 
     @FXML
-    private Label w1InfoLabel;
-
-    @FXML
     private Button w1RefreshBtn;
 
     public void getAllGoodsFromWarehouse1() {
@@ -97,15 +94,17 @@ public class Warehouse1Controller {
         HttpEntity simpleRequest = new HttpEntity<>(headers);
 
         w1SaveBtn.setOnAction(actionEvent -> {
-            if (!w1GoodIdField.getText().isEmpty() && !w1GoodCountField.getText().isEmpty()) {
+            String goodId = w1GoodIdField.getText();
+            String goodCount = w1GoodCountField.getText();
+            w1GoodIdField.setText("");
+            w1GoodCountField.setText("");
+            if (!goodId.isEmpty() && !goodCount.isEmpty()) {
                 int id, count;
                 try {
-                    id = Integer.parseInt(w1GoodIdField.getText());
-                    count = Integer.parseInt(w1GoodCountField.getText());
+                    id = Integer.parseInt(goodId);
+                    count = Integer.parseInt(goodCount);
                 } catch (NumberFormatException e) {
                     MainController.showInfo("Id and quantity must be integer", Alert.AlertType.WARNING);
-                    w1GoodIdField.setText("");
-                    w1GoodCountField.setText("");
                     return;
                 }
 
@@ -121,10 +120,8 @@ public class Warehouse1Controller {
                 } catch (HttpClientErrorException.Unauthorized e) {
                     MainController.showInfo(MainController.UNAUTORIZED_MSG, Alert.AlertType.ERROR);
                     return;
-                } catch (Exception e) { //???
-                    w1InfoLabel.setText("There is no good with such id");
-                    w1GoodIdField.setText("");
-                    w1GoodCountField.setText("");
+                } catch (Exception e) {
+                    MainController.showInfo("There is no good with such id", Alert.AlertType.ERROR);
                     return;
                 }
 
@@ -140,7 +137,7 @@ public class Warehouse1Controller {
                     MainController.showInfo(MainController.UNAUTORIZED_MSG, Alert.AlertType.ERROR);
                     return;
                 } catch (Exception e) {
-                    w1InfoLabel.setText("There is already an item with such good_id");
+                    MainController.showInfo("There is already an item with such good_id", Alert.AlertType.ERROR);
                     return;
                 }
 
@@ -207,7 +204,6 @@ public class Warehouse1Controller {
         });
 
         w1RefreshBtn.setOnAction(actionEvent -> {
-            w1InfoLabel.setText("");
             getAllGoodsFromWarehouse1();
         });
 
