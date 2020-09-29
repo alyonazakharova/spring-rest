@@ -10,7 +10,7 @@ You can perform the following steps in MySQL Command Line Client:
 ```
 create database wholesale;
 create user 'usr'@%' identified by 'password';
-grant all on wholesale.* to 'usr'@'%;
+grant all on wholesale.* to 'usr'@'%';
 ```
 Client is a simple JavaFX project.
 If you have Java 11 or later, make sure that you have JavaFX SDK installed.
