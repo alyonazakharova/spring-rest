@@ -9,7 +9,7 @@ Database used for the project is MySQL. In [application.properties](https://gith
 You can perform the following steps in MySQL Command Line Client:
 ```
 create database wholesale;
-create user 'usr'@%' identified by 'password';
+create user 'usr'@'%' identified by 'password';
 grant all on wholesale.* to 'usr'@'%';
 ```
 Client is a simple JavaFX project.
